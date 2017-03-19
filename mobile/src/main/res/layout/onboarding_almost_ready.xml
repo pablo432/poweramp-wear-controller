@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/onboarding_almost_ready_screen_bg"
+    android:gravity="center"
+    android:padding="48dp">
+
+    <TextView
+        style="@style/OnboardingHeaderStyle"
+        android:text="@string/okay"/>
+
+    <TextView
+        style="@style/OnboardingExplanationStyle"
+        android:text="@string/wait_for_wearable_installation"/>
+
+</LinearLayout>

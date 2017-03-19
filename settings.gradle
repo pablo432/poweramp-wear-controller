@@ -1,0 +1,2 @@
+include ':mobile', ':wear', ':powerampwearcommon'
+include ':poweramp_api_lib'

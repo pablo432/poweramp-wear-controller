@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/onboarding_installation_verification_screen_bg">
+
+    <ImageView
+        android:id="@+id/big_icon"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:src="@drawable/icon_big"
+        android:padding="64dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="48dp"
+            android:paddingRight="48dp"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/OnboardingHeaderStyle"
+                android:text="@string/poweramp"/>
+
+            <TextView
+                style="@style/OnboardingExplanationStyle"
+                android:text="@string/for_poweramp_only"/>
+
+            <TextView
+                android:id="@+id/app_detected_textview"
+                style="@style/OnboardingExplanationStyle"
+                android:layout_marginTop="4dp"
+                android:text="@string/installation_detected"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

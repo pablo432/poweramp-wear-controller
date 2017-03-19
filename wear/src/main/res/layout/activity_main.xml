@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    tools:context="com.pdyjak.powerampwear.MainActivity"
+    tools:deviceIds="wear">
+
+    <ImageView
+        android:id="@+id/album_art"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:foreground="#a8000000"
+        android:scaleType="centerCrop"/>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <me.relex.circleindicator.CircleIndicator
+        android:id="@+id/dots_indicator"
+        android:layout_width="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_height="16dp"
+        android:scaleX="0.65"
+        android:scaleY="0.65"
+        android:alpha="0.65"/>
+
+</FrameLayout>

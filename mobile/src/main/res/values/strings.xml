@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name" translatable="false">Poweramp Wear Controller</string>
+    <string name="prefs_key" translatable="false">com.pdyjak.powerampwear.PREFS</string>
+    <string name="restart_service_hint">If you are experiencing any problems, click here to restart service.</string>
+    <string name="restart_service">Restart service</string>
+    <string name="service_is_running">Service is running</string>
+    <string name="service_not_running">Service is disabled</string>
+    <string name="service_restarting">Restarting…</string>
+    <string name="dots">…</string>
+    <string name="status">Status</string>
+    <string name="welcome">Welcome!</string>
+    <string name="welcome_hint">Use your smartwatch to control the music on your smartphone, without a need to take the device out of your pocket.</string>
+    <string name="poweramp">Poweramp</string>
+    <string name="for_poweramp_only">This application is designed to work *only* with Poweramp Music Player.</string>
+    <string name="installation_detected">A valid installation of Poweramp has been detected on your device.</string>
+    <string name="poweramp_package_name" translatable="false">com.maxmpz.audioplayer</string>
+    <string name="poweramp_not_installed_onboarding">It seems like it is not installed on your device. Click on a big icon above to get it from Google Play Store.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_finish">Finish</string>
+    <string name="just_launch_smartwatch">Just launch Poweramp Wear Controller on your smartwatch and that\'s it!</string>
+    <string name="poweramp_not_installed">Poweramp Music Player is not installed - you can get it on Google Play.</string>
+    <string name="restart_service_pointless">There\'s no point in restarting service, since Poweramp is not installed</string>
+    <string name="service_restarted">Service restarted</string>
+    <string name="okay">Okay!</string>
+    <string name="wait_for_wearable_installation">You are almost ready to go. Just give your devices a few minutes until wearable version of application will be installed on your smartwatch.</string>
+</resources>
