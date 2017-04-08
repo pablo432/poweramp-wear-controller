@@ -37,7 +37,6 @@ public class FolderItem implements Clickable {
 
         FolderItem that = (FolderItem) o;
 
-        if (!mMusicLibraryNavigator.equals(that.mMusicLibraryNavigator)) return false;
         if (!id.equals(that.id)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
         return parentName != null ? parentName.equals(that.parentName) : that.parentName == null;
@@ -46,8 +45,7 @@ public class FolderItem implements Clickable {
 
     @Override
     public int hashCode() {
-        int result = mMusicLibraryNavigator.hashCode();
-        result = 31 * result + id.hashCode();
+        int result = id.hashCode();
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (parentName != null ? parentName.hashCode() : 0);
         return result;

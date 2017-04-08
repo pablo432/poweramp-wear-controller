@@ -1,6 +1,7 @@
 package com.pdyjak.powerampwear.music_browser.albums;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.pdyjak.powerampwear.music_browser.Clickable;
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
@@ -11,13 +12,13 @@ public class AlbumItem implements Clickable {
 
     @NonNull
     public final String id;
-    @NonNull
+    @Nullable
     final String name;
-    @NonNull
+    @Nullable
     final String artist;
 
-    AlbumItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @NonNull String name,
-            @NonNull String artist) {
+    AlbumItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @Nullable String name,
+            @Nullable String artist) {
         mMusicLibraryNavigator = helper;
         this.id = id;
         this.name = name;
@@ -35,18 +36,18 @@ public class AlbumItem implements Clickable {
         if (o == null || getClass() != o.getClass()) return false;
 
         AlbumItem albumItem = (AlbumItem) o;
-        if (!mMusicLibraryNavigator.equals(albumItem.mMusicLibraryNavigator)) return false;
+
         if (!id.equals(albumItem.id)) return false;
-        if (!name.equals(albumItem.name)) return false;
-        return artist.equals(albumItem.artist);
+        if (name != null ? !name.equals(albumItem.name) : albumItem.name != null) return false;
+        return artist != null ? artist.equals(albumItem.artist) : albumItem.artist == null;
+
     }
 
     @Override
     public int hashCode() {
-        int result = mMusicLibraryNavigator.hashCode();
-        result = 31 * result + id.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + artist.hashCode();
+        int result = id.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (artist != null ? artist.hashCode() : 0);
         return result;
     }
 }

@@ -1,6 +1,7 @@
 package com.pdyjak.powerampwear.music_browser.artists;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.pdyjak.powerampwear.music_browser.Clickable;
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
@@ -11,12 +12,12 @@ public class ArtistItem implements Clickable {
 
     @NonNull
     public final String id;
-    @NonNull
+    @Nullable
     final String name;
     final int songsCount;
 
     ArtistItem(@NonNull MusicLibraryNavigator navigator,
-            @NonNull String id, @NonNull String name, int songsCount) {
+            @NonNull String id, @Nullable String name, int songsCount) {
         mMusicLibraryNavigator = navigator;
         this.id = id;
         this.name = name;
@@ -33,18 +34,18 @@ public class ArtistItem implements Clickable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ArtistItem item = (ArtistItem) o;
-        if (songsCount != item.songsCount) return false;
-        if (!mMusicLibraryNavigator.equals(item.mMusicLibraryNavigator)) return false;
-        if (!id.equals(item.id)) return false;
-        return name.equals(item.name);
+        ArtistItem that = (ArtistItem) o;
+
+        if (songsCount != that.songsCount) return false;
+        if (!id.equals(that.id)) return false;
+        return name != null ? name.equals(that.name) : that.name == null;
+
     }
 
     @Override
     public int hashCode() {
-        int result = mMusicLibraryNavigator.hashCode();
-        result = 31 * result + id.hashCode();
-        result = 31 * result + name.hashCode();
+        int result = id.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + songsCount;
         return result;
     }

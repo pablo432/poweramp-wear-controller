@@ -15,16 +15,17 @@ public class FileItem implements Clickable {
     public final Parent parent;
     @NonNull
     public final String trackId;
-    @NonNull
+    @Nullable
     final String title;
-    @NonNull
+    @Nullable
     final String artist;
-    @NonNull
+    @Nullable
     final String album;
     final long duration;
 
-    FileItem(@NonNull MusicLibraryNavigator helper, @Nullable Parent parent, @NonNull String trackId,
-            @NonNull String title, @NonNull String artist, @NonNull String album, long duration) {
+    FileItem(@NonNull MusicLibraryNavigator helper, @Nullable Parent parent,
+            @NonNull String trackId, @Nullable String title, @Nullable String artist,
+            @Nullable String album, long duration) {
         mMusicLibraryNavigator = helper;
         this.parent = parent;
         this.trackId = trackId;
@@ -47,24 +48,23 @@ public class FileItem implements Clickable {
         FileItem fileItem = (FileItem) o;
 
         if (duration != fileItem.duration) return false;
-        if (!mMusicLibraryNavigator.equals(fileItem.mMusicLibraryNavigator)) return false;
         if (parent != null ? !parent.equals(fileItem.parent) : fileItem.parent != null)
             return false;
         if (!trackId.equals(fileItem.trackId)) return false;
-        if (!title.equals(fileItem.title)) return false;
-        if (!artist.equals(fileItem.artist)) return false;
-        return album.equals(fileItem.album);
+        if (title != null ? !title.equals(fileItem.title) : fileItem.title != null) return false;
+        if (artist != null ? !artist.equals(fileItem.artist) : fileItem.artist != null)
+            return false;
+        return album != null ? album.equals(fileItem.album) : fileItem.album == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = mMusicLibraryNavigator.hashCode();
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
+        int result = parent != null ? parent.hashCode() : 0;
         result = 31 * result + trackId.hashCode();
-        result = 31 * result + title.hashCode();
-        result = 31 * result + artist.hashCode();
-        result = 31 * result + album.hashCode();
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (artist != null ? artist.hashCode() : 0);
+        result = 31 * result + (album != null ? album.hashCode() : 0);
         result = 31 * result + (int) (duration ^ (duration >>> 32));
         return result;
     }
