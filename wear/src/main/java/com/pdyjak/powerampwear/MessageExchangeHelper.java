@@ -14,6 +14,7 @@ import com.google.android.gms.wearable.Wearable;
 import com.pdyjak.powerampwearcommon.ConnectionState;
 import com.pdyjak.powerampwearcommon.Message;
 import com.pdyjak.powerampwearcommon.NodesResolver;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

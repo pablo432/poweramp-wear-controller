@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 
 import com.pdyjak.powerampwear.music_browser.LibraryExplorerFragment;
+import com.pdyjak.powerampwear.player.PlayerControllerFragment;
 import com.pdyjak.powerampwear.settings.SettingsFragment;
 
 public class MainViewPagerAdapter extends FragmentPagerAdapter {

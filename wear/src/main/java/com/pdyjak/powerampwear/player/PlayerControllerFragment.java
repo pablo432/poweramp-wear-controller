@@ -1,4 +1,4 @@
-package com.pdyjak.powerampwear;
+package com.pdyjak.powerampwear.player;
 
 import android.graphics.drawable.LevelListDrawable;
 import android.os.Bundle;
@@ -14,6 +14,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.maxmpz.poweramp.player.PowerampAPI;
+import com.pdyjak.powerampwear.App;
+import com.pdyjak.powerampwear.MessageExchangeHelper;
+import com.pdyjak.powerampwear.MessageListener;
+import com.pdyjak.powerampwear.R;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
