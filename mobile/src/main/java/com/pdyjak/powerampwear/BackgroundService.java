@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -308,6 +309,14 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 callPowerAmpAction(PowerampAPI.Commands.PREVIOUS);
                 break;
 
+            case RequestsPaths.VOLUME_DOWN:
+                volumeDown();
+                break;
+
+            case RequestsPaths.VOLUME_UP:
+                volumeUp();
+                break;
+
             case RequestsPaths.TOGGLE_REPEAT_MODE:
                 callPowerAmpAction(PowerampAPI.Commands.REPEAT);
                 break;
@@ -340,6 +349,16 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 processPlaySongRequest(messageEvent);
                 break;
         }
+    }
+
+    private void volumeDown() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
+    }
+
+    private void volumeUp() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
     }
 
     private void processGetAlbumsRequest(@NonNull MessageEvent event) {

@@ -5,7 +5,7 @@ import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 
 import com.pdyjak.powerampwear.music_browser.LibraryExplorerFragment;
-import com.pdyjak.powerampwear.player.PlayerControllerFragment;
+import com.pdyjak.powerampwear.player.PlayerComboFragment;
 import com.pdyjak.powerampwear.settings.SettingsFragment;
 
 public class MainViewPagerAdapter extends FragmentPagerAdapter {
@@ -18,7 +18,7 @@ public class MainViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return new PlayerControllerFragment();
+                return new PlayerComboFragment();
 
             case 1:
                 return new LibraryExplorerFragment();

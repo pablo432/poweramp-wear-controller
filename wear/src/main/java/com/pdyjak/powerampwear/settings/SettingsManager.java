@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class SettingsManager {
     private static final String CIRCULAR_SCROLLING_KEY = "use_circular_scrolling";
+    private static final String VOLUME_CONTROLS_ONBOARDING_KEY = "vc_onboarding";
 
     public static class Listener {
         public void onCircularScrollingChanged() {}
@@ -20,6 +21,14 @@ public class SettingsManager {
 
     public SettingsManager(@NonNull SharedPreferences sharedPreferences) {
         mPrefs = sharedPreferences;
+    }
+
+    public boolean volumeControlsOnboardingShown() {
+        return mPrefs.getBoolean(VOLUME_CONTROLS_ONBOARDING_KEY, false);
+    }
+
+    public void saveVolumeControlsOnboardingShown() {
+        mPrefs.edit().putBoolean(VOLUME_CONTROLS_ONBOARDING_KEY, true).apply();
     }
 
     public boolean useCircularScrollingGesture() {

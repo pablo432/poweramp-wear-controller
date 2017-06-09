@@ -14,4 +14,20 @@
     <string name="invalidate_cache">Invalidate music library cache</string>
     <string name="cache_invalidated">Cache invalidated</string>
     <string name="connection_failure_msg">Cannot connect with the mobile. Make sure that you are connected via Bluetooth and try restarting service in Poweramp Wear Controller mobile application.</string>
+
+    <string name="repeat_off">Repeat off</string>
+    <string name="repeat_list">Repeat list</string>
+    <string name="advance_list">Advance list</string>
+    <string name="repeat_song">Repeat song</string>
+
+    <string name="shuffle_off">Shuffle off</string>
+    <string name="shuffle_all">Shuffle all</string>
+    <string name="shuffle_songs">Shuffle songs</string>
+    <string name="shuffle_lists">Shuffle lists</string>
+    <string name="shuffle_songs_lists">Songs/lists</string>
+    <string name="repeat_mode">Repeat mode</string>
+    <string name="shuffle_mode">Shuffle mode</string>
+
+    <string name="repeat_shuffle_moved_hint">Hi! Now shuffle/repeat mode buttons are here…</string>
+    <string name="volume_controls_added_hint">…because volume controls are now here :)</string>
 </resources>

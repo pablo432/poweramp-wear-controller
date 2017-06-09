@@ -3,6 +3,8 @@ package com.pdyjak.powerampwearcommon.requests;
 public class RequestsPaths {
     public static final String NEXT_TRACK = "/next_track";
     public static final String PREV_TRACK = "/prev_track";
+    public static final String VOLUME_DOWN = "/volume_down";
+    public static final String VOLUME_UP = "/volume_up";
     public static final String TOGGLE_PLAY_PAUSE = "/toggle_play_pause";
     public static final String REFRESH_TRACK_INFO = "/request_track_info";
     public static final String TOGGLE_SHUFFLE_MODE = "/toggle_shuffle_mode";
