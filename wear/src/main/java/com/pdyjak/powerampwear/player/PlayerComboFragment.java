@@ -18,18 +18,26 @@ import com.pdyjak.powerampwear.custom_views.BlockingRecyclerView;
 import com.pdyjak.powerampwear.custom_views.SmoothScrollingLinearLayoutManager;
 import com.pdyjak.powerampwear.settings.SettingsManager;
 
-public class PlayerComboFragment extends android.app.Fragment {
+public class PlayerComboFragment extends android.app.Fragment
+        implements PlayerViewModel.CommonEventsListener {
 
     @NonNull
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private PlayerViewModel mPlayerViewModel;
     private BlockingRecyclerView mRecyclerView;
+    private boolean mFirstResume = true;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlayerViewModel = new PlayerViewModel(((App) getActivity().getApplicationContext())
                 .getMessageExchangeHelper());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPlayerViewModel = null;
     }
 
     @Nullable
@@ -51,16 +59,6 @@ public class PlayerComboFragment extends android.app.Fragment {
         super.onDestroyView();
         mRecyclerView.setAdapter(null);
         mRecyclerView = null;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        SettingsManager settingsManager = ((App) getActivity().getApplicationContext())
-                .getSettingsManager();
-        if (!settingsManager.volumeControlsOnboardingShown()) {
-            showRepeatShuffleButtonsMovedOnboarding();
-        }
     }
 
     private void showRepeatShuffleButtonsMovedOnboarding() {
@@ -87,7 +85,7 @@ public class PlayerComboFragment extends android.app.Fragment {
                     }
                 }, 600);
             }
-        }, 2000);
+        }, 500);
     }
 
     private void showVolumeControlsOnboarding() {
@@ -108,17 +106,39 @@ public class PlayerComboFragment extends android.app.Fragment {
         }, 600);
     }
 
-
-
     @Override
     public void onResume() {
         super.onResume();
+        if (mFirstResume) {
+            mFirstResume = false;
+            SettingsManager settingsManager = ((App) getActivity().getApplicationContext())
+                    .getSettingsManager();
+            if (!settingsManager.volumeControlsOnboardingShown()) {
+                mPlayerViewModel.addListenerWeakly(this);
+            }
+        }
         mPlayerViewModel.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mPlayerViewModel.removeListener(this);
         mPlayerViewModel.onPause();
+    }
+
+    @Override
+    public void onStateChanged() {
+        if (mPlayerViewModel.getCurrentState() != PlayerViewModel.State.Ok) return;
+        mPlayerViewModel.removeListener(this);
+        showRepeatShuffleButtonsMovedOnboarding();
+    }
+
+    @Override
+    public void onPauseChanged() {
+    }
+
+    @Override
+    public void onTrackInfoChanged() {
     }
 }
