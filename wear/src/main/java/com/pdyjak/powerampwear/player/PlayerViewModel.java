@@ -13,8 +13,10 @@ import com.pdyjak.powerampwear.settings.SettingsManager;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
+import com.pdyjak.powerampwearcommon.events.TrackPositionSyncEvent;
 import com.pdyjak.powerampwearcommon.requests.RequestsPaths;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +24,8 @@ import java.util.WeakHashMap;
 
 class PlayerViewModel implements MessageListener {
     private static final int DEFAULT_TIMEOUT = 5000;
+    private static final int TRACK_POSITION_UPDATE_DELAY = 1000;
+    private static final int SECONDS_PER_TICK = TRACK_POSITION_UPDATE_DELAY / 1000;
 
     private static final int REPEAT_MAX_LEVEL = 3;
     private static final int SHUFFLE_MAX_LEVEL = 4;
@@ -39,6 +43,10 @@ class PlayerViewModel implements MessageListener {
     interface RepeatShuffleModesListener {
         void onRepeatModeChanged();
         void onShuffleModeChanged();
+    }
+
+    interface TrackPositionListener {
+        void onPositionChanged(int position, int duration); // both in seconds
     }
 
     enum State {
@@ -117,6 +125,18 @@ class PlayerViewModel implements MessageListener {
             setState(State.Failure);
         }
     };
+    @NonNull
+    private final Runnable mTrackTimeUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mCurrentTrackPosition += SECONDS_PER_TICK;
+            notifyTrackPositionChanged();
+            mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
+            mHandler.postDelayed(mTrackTimeUpdateRunnable, TRACK_POSITION_UPDATE_DELAY);
+        }
+    };
+    @Nullable
+    private WeakReference<TrackPositionListener> mTrackPositionListener;
 
     private boolean mTimeoutRunnablePosted;
     @NonNull
@@ -131,6 +151,8 @@ class PlayerViewModel implements MessageListener {
     private String mArtistAlbum;
     private boolean mPaused = true;
     private boolean mShowClock;
+    private int mCurrentTrackDuration;
+    private int mCurrentTrackPosition;
 
     PlayerViewModel(@NonNull SettingsManager settingsManager,
             @NonNull MessageExchangeHelper helper) {
@@ -163,6 +185,14 @@ class PlayerViewModel implements MessageListener {
         mClockSettingListeners.remove(listener);
     }
 
+    void setTrackPositionListenerWeakly(@Nullable TrackPositionListener listener) {
+        if (listener == null) {
+            mTrackPositionListener = null;
+            return;
+        }
+        mTrackPositionListener = new WeakReference<>(listener);
+    }
+
     void onResume() {
         if (!mTimeoutRunnablePosted) {
             mTimeoutRunnablePosted = true;
@@ -188,6 +218,7 @@ class PlayerViewModel implements MessageListener {
         mMessageExchangeHelper.removeMessageListener(this);
         mSettingsManager.removeListener(mClockSettingListener);
         removeTimeoutCallbackFromHandler();
+        mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
     }
 
     @NonNull
@@ -246,7 +277,29 @@ class PlayerViewModel implements MessageListener {
             case PlayingModeChangedEvent.PATH:
                 processPlayingModeInfo(PlayingModeChangedEvent.fromBytes(messageEvent.getData()));
                 break;
+
+            case TrackPositionSyncEvent.PATH:
+                processTrackPositionSyncInfo(TrackPositionSyncEvent.fromBytes(
+                        messageEvent.getData()));
+                break;
         }
+    }
+
+    private void processTrackPositionSyncInfo(
+            @NonNull TrackPositionSyncEvent trackPositionSyncEvent) {
+        mCurrentTrackPosition = trackPositionSyncEvent.position;
+        notifyTrackPositionChanged();
+        if (!mPaused) {
+            mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
+            mHandler.postDelayed(mTrackTimeUpdateRunnable, TRACK_POSITION_UPDATE_DELAY);
+        }
+    }
+
+    private void notifyTrackPositionChanged() {
+        TrackPositionListener listener = mTrackPositionListener == null
+                ? null : mTrackPositionListener.get();
+        if (listener == null || mCurrentTrackPosition > mCurrentTrackDuration) return;
+        listener.onPositionChanged(mCurrentTrackPosition, mCurrentTrackDuration);
     }
 
     private void processPlayingModeInfo(@NonNull PlayingModeChangedEvent playingModeChangedEvent) {
@@ -258,6 +311,7 @@ class PlayerViewModel implements MessageListener {
 
     private void processTrackInfo(@NonNull TrackChangedEvent event) {
         boolean changed = setTitle(event.title);
+        mCurrentTrackDuration = event.duration;
         String secondLine = "";
         if (event.artist != null) {
             secondLine = event.artist;
@@ -281,6 +335,11 @@ class PlayerViewModel implements MessageListener {
 
     void togglePlayPause() {
         setPaused(!mPaused);
+        if (mPaused) {
+            mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
+        } else {
+            mMessageExchangeHelper.sendRequest(RequestsPaths.SYNC_TRACK_POSITION);
+        }
         mMessageExchangeHelper.sendRequest(RequestsPaths.TOGGLE_PLAY_PAUSE);
     }
 

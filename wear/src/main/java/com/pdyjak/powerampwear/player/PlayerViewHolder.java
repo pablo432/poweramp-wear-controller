@@ -8,10 +8,11 @@ import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.pdyjak.powerampwear.R;
+import com.pdyjak.powerampwear.custom_views.CircularProgressbar;
 
 class PlayerViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener, PlayerViewModel.CommonEventsListener,
-        PlayerViewModel.ClockSettingListener {
+        PlayerViewModel.ClockSettingListener, PlayerViewModel.TrackPositionListener {
 
     private static final int PLAY_PAUSE_TAG = 0;
     private static final int PREV_SONG_TAG = 1;
@@ -35,12 +36,15 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private final ImageView mPlayPauseButton;
     @NonNull
     private final TextClock mClock;
+    @NonNull
+    private final CircularProgressbar mProgressbar;
 
     PlayerViewHolder(@NonNull View view, @NonNull PlayerViewModel viewModel) {
         super(view);
         mViewModel = viewModel;
         mViewModel.addListenerWeakly((PlayerViewModel.CommonEventsListener) this);
         mViewModel.addListenerWeakly((PlayerViewModel.ClockSettingListener) this);
+        mViewModel.setTrackPositionListenerWeakly(this);
         mProgressSpinner = view.findViewById(R.id.progress_spinner);
         mErrorContainer = view.findViewById(R.id.error_container);
         mPlayerViewRoot = view.findViewById(R.id.player_root);
@@ -69,6 +73,7 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         volumeUpButton.setOnClickListener(this);
 
         mClock = (TextClock) view.findViewById(R.id.clock);
+        mProgressbar = (CircularProgressbar) view.findViewById(R.id.seekbar);
 
         onStateChanged();
         onPauseChanged();
@@ -140,5 +145,11 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     @Override
     public void onClockSettingChanged() {
         mClock.setVisibility(mViewModel.showClock() ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onPositionChanged(int position, int duration) {
+        if (duration == 0) return;
+        mProgressbar.setProgress(Math.min(1.0f, (float) position / duration));
     }
 }

@@ -29,6 +29,7 @@ import com.pdyjak.powerampwearcommon.events.AlbumArtChangedEvent;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
+import com.pdyjak.powerampwearcommon.events.TrackPositionSyncEvent;
 import com.pdyjak.powerampwearcommon.requests.GetAlbumsRequest;
 import com.pdyjak.powerampwearcommon.requests.GetFilesRequest;
 import com.pdyjak.powerampwearcommon.requests.PlaySongRequest;
@@ -57,7 +58,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     private Intent mStatusIntent;
     private Intent mAlbumArtIntent;
     private Intent mPlayingModeIntent;
-    private Intent mRepeatModeIntent;
+    private Intent mTrackPosIntent;
     private GoogleApiClient mGoogleApiClient;
     private ConnectionState mConnectionState;
     private NodesResolver mNodesResolver;
@@ -99,6 +100,14 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         public void onReceive(Context context, Intent intent) {
             mPlayingModeIntent = intent;
             processPlayingModeIntent();
+        }
+    };
+
+    private BroadcastReceiver mTrackPosSyncReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mTrackPosIntent = intent;
+            processTrackPositionIntent();
         }
     };
 
@@ -178,6 +187,8 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 new IntentFilter(PowerampAPI.ACTION_AA_CHANGED));
         mPlayingModeIntent = registerReceiver(mPlayingModeReceiver,
                 new IntentFilter(PowerampAPI.ACTION_PLAYING_MODE_CHANGED));
+        mTrackPosIntent = registerReceiver(mTrackPosSyncReceiver,
+                new IntentFilter(PowerampAPI.ACTION_TRACK_POS_SYNC));
         processAllIntents(false);
     }
 
@@ -187,6 +198,8 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         unregisterReceiver(mTrackReceiver);
         unregisterReceiver(mStatusReceiver);
         unregisterReceiver(mAlbumArtReceiver);
+        unregisterReceiver(mPlayingModeReceiver);
+        unregisterReceiver(mTrackPosSyncReceiver);
     }
 
     private void processTrackIntent(boolean requestedByWearable) {
@@ -269,6 +282,16 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         send(PlayingModeChangedEvent.PATH, new PlayingModeChangedEvent(shuffle, repeat));
     }
 
+    private void processTrackPositionIntent() {
+        if (mConnectionState == ConnectionState.Connecting || mTrackPosIntent == null) return;
+        if (connectIfNeeded()) {
+            // Intents will be processed after GoogleApiClient successfully connects.
+            return;
+        }
+        int pos = mTrackPosIntent.getIntExtra(PowerampAPI.Track.POSITION, 0);
+        send(TrackPositionSyncEvent.PATH, new TrackPositionSyncEvent(pos));
+    }
+
     private void send(@NonNull final String path, @Nullable final Message message) {
         if (mNodesResolver == null) return;
         mNodesResolver.resolveNodes(false, new NodesResolver.Listener() {
@@ -317,6 +340,10 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 volumeUp();
                 break;
 
+            case RequestsPaths.SYNC_TRACK_POSITION:
+                callPowerAmpAction(PowerampAPI.Commands.POS_SYNC);
+                break;
+
             case RequestsPaths.TOGGLE_REPEAT_MODE:
                 callPowerAmpAction(PowerampAPI.Commands.REPEAT);
                 break;
@@ -327,6 +354,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
 
             case RequestsPaths.REFRESH_TRACK_INFO:
                 processAllIntents(true);
+                callPowerAmpAction(PowerampAPI.Commands.POS_SYNC);
                 break;
 
             case RequestsPaths.GET_FOLDERS:
@@ -409,6 +437,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         processStatusIntent();
         processAlbumArtIntent();
         processPlayingModeIntent();
+        // processTrackPositionIntent(); // Don't.
     }
 
     private void callPowerAmpAction(int command) {

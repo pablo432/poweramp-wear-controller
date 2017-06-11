@@ -35,11 +35,11 @@
         android:layout_height="match_parent"
         app:layout_box="all">
 
-        <!--<com.pdyjak.powerampwear.custom_views.CircularSeekbar-->
-        <!--android:id="@+id/seekbar"-->
-        <!--android:layout_width="56dp"-->
-        <!--android:layout_height="56dp"-->
-        <!--android:layout_centerInParent="true" />-->
+        <com.pdyjak.powerampwear.custom_views.CircularProgressbar
+            android:id="@+id/seekbar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerInParent="true" />
 
         <ImageView
             android:id="@+id/play_pause_button"
