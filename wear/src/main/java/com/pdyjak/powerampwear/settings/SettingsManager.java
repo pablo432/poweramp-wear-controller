@@ -8,10 +8,12 @@ import java.util.Set;
 
 public class SettingsManager {
     private static final String CIRCULAR_SCROLLING_KEY = "use_circular_scrolling";
+    private static final String SHOW_CLOCK_KEY = "show_clock";
     private static final String VOLUME_CONTROLS_ONBOARDING_KEY = "vc_onboarding";
 
     public static class Listener {
         public void onCircularScrollingChanged() {}
+        public void onClockSettingChanged() {}
     }
 
     @NonNull
@@ -35,12 +37,25 @@ public class SettingsManager {
         return mPrefs.getBoolean(CIRCULAR_SCROLLING_KEY, false);
     }
 
-    public void saveUseCircularScrolling(boolean value) {
-        if (value == useCircularScrollingGesture()) return;
-        mPrefs.edit().putBoolean(CIRCULAR_SCROLLING_KEY, value).apply();
+    public boolean showClock() {
+        return mPrefs.getBoolean(SHOW_CLOCK_KEY, true);
+    }
+
+    public void saveUseCircularScrolling(boolean enabled) {
+        if (enabled == useCircularScrollingGesture()) return;
+        mPrefs.edit().putBoolean(CIRCULAR_SCROLLING_KEY, enabled).apply();
         Set<Listener> copy = new HashSet<>(mSettingsListeners);
         for (Listener listener : copy) {
             listener.onCircularScrollingChanged();
+        }
+    }
+
+    public void saveShowClock(boolean enabled) {
+        if (enabled == showClock()) return;
+        mPrefs.edit().putBoolean(SHOW_CLOCK_KEY, enabled).apply();
+        Set<Listener> copy = new HashSet<>(mSettingsListeners);
+        for (Listener listener : copy) {
+            listener.onClockSettingChanged();
         }
     }
 

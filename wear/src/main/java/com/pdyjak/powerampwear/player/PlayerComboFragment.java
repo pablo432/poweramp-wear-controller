@@ -30,8 +30,9 @@ public class PlayerComboFragment extends android.app.Fragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPlayerViewModel = new PlayerViewModel(((App) getActivity().getApplicationContext())
-                .getMessageExchangeHelper());
+        App app = (App) getActivity().getApplicationContext();
+        mPlayerViewModel = new PlayerViewModel(app.getSettingsManager(),
+                app.getMessageExchangeHelper());
     }
 
     @Override

@@ -4,12 +4,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.pdyjak.powerampwear.R;
 
 class PlayerViewHolder extends RecyclerView.ViewHolder
-        implements View.OnClickListener, PlayerViewModel.CommonEventsListener {
+        implements View.OnClickListener, PlayerViewModel.CommonEventsListener,
+        PlayerViewModel.ClockSettingListener {
 
     private static final int PLAY_PAUSE_TAG = 0;
     private static final int PREV_SONG_TAG = 1;
@@ -31,11 +33,14 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private final TextView mArtistAlbumTextView;
     @NonNull
     private final ImageView mPlayPauseButton;
+    @NonNull
+    private final TextClock mClock;
 
     PlayerViewHolder(@NonNull View view, @NonNull PlayerViewModel viewModel) {
         super(view);
         mViewModel = viewModel;
-        mViewModel.addListenerWeakly(this);
+        mViewModel.addListenerWeakly((PlayerViewModel.CommonEventsListener) this);
+        mViewModel.addListenerWeakly((PlayerViewModel.ClockSettingListener) this);
         mProgressSpinner = view.findViewById(R.id.progress_spinner);
         mErrorContainer = view.findViewById(R.id.error_container);
         mPlayerViewRoot = view.findViewById(R.id.player_root);
@@ -63,9 +68,12 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         volumeUpButton.setTag(VOLUME_UP_TAG);
         volumeUpButton.setOnClickListener(this);
 
+        mClock = (TextClock) view.findViewById(R.id.clock);
+
         onStateChanged();
         onPauseChanged();
         onTrackInfoChanged();
+        onClockSettingChanged();
     }
 
     @Override
@@ -127,5 +135,10 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     public void onTrackInfoChanged() {
         mTitleTextView.setText(mViewModel.getTitle());
         mArtistAlbumTextView.setText(mViewModel.getArtistAlbum());
+    }
+
+    @Override
+    public void onClockSettingChanged() {
+        mClock.setVisibility(mViewModel.showClock() ? View.VISIBLE : View.GONE);
     }
 }

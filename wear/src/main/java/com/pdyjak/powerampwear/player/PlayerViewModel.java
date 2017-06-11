@@ -9,6 +9,7 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.maxmpz.poweramp.player.PowerampAPI;
 import com.pdyjak.powerampwear.MessageExchangeHelper;
 import com.pdyjak.powerampwear.MessageListener;
+import com.pdyjak.powerampwear.settings.SettingsManager;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
@@ -24,6 +25,10 @@ class PlayerViewModel implements MessageListener {
 
     private static final int REPEAT_MAX_LEVEL = 3;
     private static final int SHUFFLE_MAX_LEVEL = 4;
+
+    interface ClockSettingListener {
+        void onClockSettingChanged();
+    }
 
     interface CommonEventsListener {
         void onStateChanged();
@@ -81,14 +86,28 @@ class PlayerViewModel implements MessageListener {
         }
     }
 
+    private class SettingsListener extends SettingsManager.Listener {
+        @Override
+        public void onClockSettingChanged() {
+            refreshClockVisibilityStatus();
+        }
+    }
+
+    @NonNull
+    private final SettingsManager mSettingsManager;
     @NonNull
     private final MessageExchangeHelper mMessageExchangeHelper;
+    @NonNull
+    private final SettingsListener mClockSettingListener = new SettingsListener();
     @NonNull
     private final Set<CommonEventsListener> mListeners =
             Collections.newSetFromMap(new WeakHashMap<CommonEventsListener, Boolean>());
     @NonNull
     private final Set<RepeatShuffleModesListener> mRepeatShuffleListeners =
             Collections.newSetFromMap(new WeakHashMap<RepeatShuffleModesListener, Boolean>());
+    @NonNull
+    private final Set<ClockSettingListener> mClockSettingListeners =
+            Collections.newSetFromMap(new WeakHashMap<ClockSettingListener, Boolean>());
     @NonNull
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
@@ -99,7 +118,6 @@ class PlayerViewModel implements MessageListener {
         }
     };
 
-    private boolean mPaused = true;
     private boolean mTimeoutRunnablePosted;
     @NonNull
     private State mCurrentState = State.Loading;
@@ -111,9 +129,14 @@ class PlayerViewModel implements MessageListener {
     private String mTitle;
     @Nullable
     private String mArtistAlbum;
+    private boolean mPaused = true;
+    private boolean mShowClock;
 
-    PlayerViewModel(@NonNull MessageExchangeHelper helper) {
+    PlayerViewModel(@NonNull SettingsManager settingsManager,
+            @NonNull MessageExchangeHelper helper) {
+        mSettingsManager = settingsManager;
         mMessageExchangeHelper = helper;
+        mShowClock = mSettingsManager.showClock();
     }
 
     void addListenerWeakly(@NonNull CommonEventsListener listener) {
@@ -124,12 +147,20 @@ class PlayerViewModel implements MessageListener {
         mRepeatShuffleListeners.add(listener);
     }
 
+    void addListenerWeakly(@NonNull ClockSettingListener listener) {
+        mClockSettingListeners.add(listener);
+    }
+
     void removeListener(@NonNull CommonEventsListener listener) {
         mListeners.remove(listener);
     }
 
     void removeListener(@NonNull RepeatShuffleModesListener listener) {
         mRepeatShuffleListeners.remove(listener);
+    }
+
+    void removeListener(@NonNull ClockSettingListener listener) {
+        mClockSettingListeners.remove(listener);
     }
 
     void onResume() {
@@ -139,20 +170,29 @@ class PlayerViewModel implements MessageListener {
         }
         mMessageExchangeHelper.addMessageListenerWeakly(this);
         mMessageExchangeHelper.sendRequest(RequestsPaths.REFRESH_TRACK_INFO);
+        mSettingsManager.addSettingsListener(mClockSettingListener);
+        refreshClockVisibilityStatus();
+    }
+
+    private void refreshClockVisibilityStatus() {
+        boolean showClock = mSettingsManager.showClock();
+        if (showClock == mShowClock) return;
+        mShowClock = showClock;
+        Set<ClockSettingListener> copy = new HashSet<>(mClockSettingListeners);
+        for (ClockSettingListener listener : copy) {
+            listener.onClockSettingChanged();
+        }
     }
 
     void onPause() {
         mMessageExchangeHelper.removeMessageListener(this);
+        mSettingsManager.removeListener(mClockSettingListener);
         removeTimeoutCallbackFromHandler();
     }
 
     @NonNull
     State getCurrentState() {
         return mCurrentState;
-    }
-
-    boolean isPaused() {
-        return mPaused;
     }
 
     @NonNull
@@ -173,6 +213,14 @@ class PlayerViewModel implements MessageListener {
     @Nullable
     String getArtistAlbum() {
         return mArtistAlbum;
+    }
+
+    boolean isPaused() {
+        return mPaused;
+    }
+
+    boolean showClock() {
+        return mShowClock;
     }
 
     private void removeTimeoutCallbackFromHandler() {

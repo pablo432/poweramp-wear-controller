@@ -22,6 +22,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.settings_fragment, container, false);
+
         CheckBox circularScrolling = (CheckBox) view.findViewById(R.id.circular_scrolling_checkbox);
         circularScrolling.setChecked(getSettingsManager().useCircularScrollingGesture());
         circularScrolling.setOnCheckedChangeListener(
@@ -31,6 +32,16 @@ public class SettingsFragment extends Fragment {
                 getSettingsManager().saveUseCircularScrolling(isChecked);
             }
         });
+
+        CheckBox clockCheckBox = (CheckBox) view.findViewById(R.id.clock_checkbox);
+        clockCheckBox.setChecked(getSettingsManager().showClock());
+        clockCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                getSettingsManager().saveShowClock(isChecked);
+            }
+        });
+
         view.findViewById(R.id.invalidate_cache).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

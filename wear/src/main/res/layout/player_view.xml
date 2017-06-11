@@ -127,5 +127,14 @@
         </LinearLayout>
 
     </RelativeLayout>
+    
+    <TextClock
+        android:id="@+id/clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:textSize="13sp"
+        android:textColor="@color/white"
+        android:layout_marginBottom="16dp"/>
 
 </android.support.wearable.view.BoxInsetLayout>
