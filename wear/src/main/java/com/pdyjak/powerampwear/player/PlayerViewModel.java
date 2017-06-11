@@ -30,8 +30,9 @@ class PlayerViewModel implements MessageListener {
     private static final int REPEAT_MAX_LEVEL = 3;
     private static final int SHUFFLE_MAX_LEVEL = 4;
 
-    interface ClockSettingListener {
-        void onClockSettingChanged();
+    interface UiElementsVisibilityListener {
+        void onClockVisibilityChanged();
+        void onProgressbarVisibilityChanged();
     }
 
     interface CommonEventsListener {
@@ -101,12 +102,28 @@ class PlayerViewModel implements MessageListener {
         }
     }
 
+    private class AmbientModeListener implements AmbientModeStateProvider.Listener {
+        @Override
+        public void onAmbientModeStateChanged() {
+            if (mAmbientModeStateProvider.isInAmbientMode()) {
+                mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
+            } else {
+                mMessageExchangeHelper.sendRequest(RequestsPaths.SYNC_TRACK_POSITION);
+            }
+            refreshProgressbarVisibilityStatus();
+        }
+    }
+
     @NonNull
     private final SettingsManager mSettingsManager;
     @NonNull
     private final MessageExchangeHelper mMessageExchangeHelper;
     @NonNull
+    private final AmbientModeStateProvider mAmbientModeStateProvider;
+    @NonNull
     private final SettingsListener mClockSettingListener = new SettingsListener();
+    @NonNull
+    private final AmbientModeListener mAmbientModeListener = new AmbientModeListener();
     @NonNull
     private final Set<CommonEventsListener> mListeners =
             Collections.newSetFromMap(new WeakHashMap<CommonEventsListener, Boolean>());
@@ -114,8 +131,8 @@ class PlayerViewModel implements MessageListener {
     private final Set<RepeatShuffleModesListener> mRepeatShuffleListeners =
             Collections.newSetFromMap(new WeakHashMap<RepeatShuffleModesListener, Boolean>());
     @NonNull
-    private final Set<ClockSettingListener> mClockSettingListeners =
-            Collections.newSetFromMap(new WeakHashMap<ClockSettingListener, Boolean>());
+    private final Set<UiElementsVisibilityListener> mUiElementsVisibilityListeners =
+            Collections.newSetFromMap(new WeakHashMap<UiElementsVisibilityListener, Boolean>());
     @NonNull
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     @NonNull
@@ -150,15 +167,19 @@ class PlayerViewModel implements MessageListener {
     @Nullable
     private String mArtistAlbum;
     private boolean mPaused = true;
-    private boolean mShowClock;
+    private boolean mShouldShowClock;
+    private boolean mInAmbientMode;
     private int mCurrentTrackDuration;
     private int mCurrentTrackPosition;
 
     PlayerViewModel(@NonNull SettingsManager settingsManager,
-            @NonNull MessageExchangeHelper helper) {
+            @NonNull MessageExchangeHelper helper,
+            @NonNull AmbientModeStateProvider ambientModeStateProvider) {
         mSettingsManager = settingsManager;
         mMessageExchangeHelper = helper;
-        mShowClock = mSettingsManager.showClock();
+        mAmbientModeStateProvider = ambientModeStateProvider;
+        mShouldShowClock = mSettingsManager.shouldShowClock();
+        mInAmbientMode = mAmbientModeStateProvider.isInAmbientMode();
     }
 
     void addListenerWeakly(@NonNull CommonEventsListener listener) {
@@ -169,8 +190,8 @@ class PlayerViewModel implements MessageListener {
         mRepeatShuffleListeners.add(listener);
     }
 
-    void addListenerWeakly(@NonNull ClockSettingListener listener) {
-        mClockSettingListeners.add(listener);
+    void addListenerWeakly(@NonNull UiElementsVisibilityListener listener) {
+        mUiElementsVisibilityListeners.add(listener);
     }
 
     void removeListener(@NonNull CommonEventsListener listener) {
@@ -181,8 +202,8 @@ class PlayerViewModel implements MessageListener {
         mRepeatShuffleListeners.remove(listener);
     }
 
-    void removeListener(@NonNull ClockSettingListener listener) {
-        mClockSettingListeners.remove(listener);
+    void removeListener(@NonNull UiElementsVisibilityListener listener) {
+        mUiElementsVisibilityListeners.remove(listener);
     }
 
     void setTrackPositionListenerWeakly(@Nullable TrackPositionListener listener) {
@@ -201,22 +222,35 @@ class PlayerViewModel implements MessageListener {
         mMessageExchangeHelper.addMessageListenerWeakly(this);
         mMessageExchangeHelper.sendRequest(RequestsPaths.REFRESH_TRACK_INFO);
         mSettingsManager.addSettingsListener(mClockSettingListener);
+        mAmbientModeStateProvider.addAmbientModeListener(mAmbientModeListener);
         refreshClockVisibilityStatus();
+        refreshProgressbarVisibilityStatus();
     }
 
     private void refreshClockVisibilityStatus() {
-        boolean showClock = mSettingsManager.showClock();
-        if (showClock == mShowClock) return;
-        mShowClock = showClock;
-        Set<ClockSettingListener> copy = new HashSet<>(mClockSettingListeners);
-        for (ClockSettingListener listener : copy) {
-            listener.onClockSettingChanged();
+        boolean showClock = mSettingsManager.shouldShowClock();
+        if (showClock == mShouldShowClock) return;
+        mShouldShowClock = showClock;
+        Set<UiElementsVisibilityListener> copy = new HashSet<>(mUiElementsVisibilityListeners);
+        for (UiElementsVisibilityListener listener : copy) {
+            listener.onClockVisibilityChanged();
+        }
+    }
+
+    private void refreshProgressbarVisibilityStatus() {
+        boolean ambient = mAmbientModeStateProvider.isInAmbientMode();
+        if (mInAmbientMode == ambient) return;
+        mInAmbientMode = ambient;
+        Set<UiElementsVisibilityListener> copy = new HashSet<>(mUiElementsVisibilityListeners);
+        for (UiElementsVisibilityListener listener : copy) {
+            listener.onProgressbarVisibilityChanged();
         }
     }
 
     void onPause() {
         mMessageExchangeHelper.removeMessageListener(this);
         mSettingsManager.removeListener(mClockSettingListener);
+        mAmbientModeStateProvider.removeAmbientModeListener(mAmbientModeListener);
         removeTimeoutCallbackFromHandler();
         mHandler.removeCallbacks(mTrackTimeUpdateRunnable);
     }
@@ -250,8 +284,12 @@ class PlayerViewModel implements MessageListener {
         return mPaused;
     }
 
-    boolean showClock() {
-        return mShowClock;
+    boolean shouldShowClock() {
+        return mShouldShowClock;
+    }
+
+    boolean shouldShowProgressbar() {
+        return !mInAmbientMode;
     }
 
     private void removeTimeoutCallbackFromHandler() {

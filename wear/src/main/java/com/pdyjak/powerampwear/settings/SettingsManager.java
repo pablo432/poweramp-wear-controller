@@ -37,7 +37,7 @@ public class SettingsManager {
         return mPrefs.getBoolean(CIRCULAR_SCROLLING_KEY, false);
     }
 
-    public boolean showClock() {
+    public boolean shouldShowClock() {
         return mPrefs.getBoolean(SHOW_CLOCK_KEY, true);
     }
 
@@ -51,7 +51,7 @@ public class SettingsManager {
     }
 
     public void saveShowClock(boolean enabled) {
-        if (enabled == showClock()) return;
+        if (enabled == shouldShowClock()) return;
         mPrefs.edit().putBoolean(SHOW_CLOCK_KEY, enabled).apply();
         Set<Listener> copy = new HashSet<>(mSettingsListeners);
         for (Listener listener : copy) {

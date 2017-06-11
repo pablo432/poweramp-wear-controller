@@ -6,15 +6,25 @@ import android.support.annotation.NonNull;
 
 import com.pdyjak.powerampwear.music_browser.MusicLibraryCache;
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
+import com.pdyjak.powerampwear.player.AmbientModeStateProvider;
 import com.pdyjak.powerampwear.settings.SettingsManager;
 
-public class App extends Application implements Thread.UncaughtExceptionHandler {
+import java.util.HashSet;
+import java.util.Set;
+
+public class App extends Application implements Thread.UncaughtExceptionHandler,
+        AmbientModeStateProvider {
+
+    @NonNull
+    private final Set<AmbientModeStateProvider.Listener> mAmbientModeListeners =
+            new HashSet<>();
 
     private Thread.UncaughtExceptionHandler mDefaultExceptionHandler;
     private SettingsManager mSettingsManager;
     private MusicLibraryCache mMusicLibraryCache;
     private MusicLibraryNavigator mMusicLibraryNavigator;
     private MessageExchangeHelper mMessageExchangeHelper;
+    private boolean mInAmbientMode = false;
 
     @Override
     public void onCreate() {
@@ -68,5 +78,29 @@ public class App extends Application implements Thread.UncaughtExceptionHandler 
     public void uncaughtException(Thread thread, Throwable throwable) {
         CrashDeliveryService.launch(throwable, this);
         mDefaultExceptionHandler.uncaughtException(thread, throwable);
+    }
+
+    @Override
+    public boolean isInAmbientMode() {
+        return mInAmbientMode;
+    }
+
+    @Override
+    public void addAmbientModeListener(@NonNull Listener listener) {
+        mAmbientModeListeners.add(listener);
+    }
+
+    @Override
+    public void removeAmbientModeListener(@NonNull Listener listener) {
+        mAmbientModeListeners.remove(listener);
+    }
+
+    void setIsInAmbientMode(boolean enabled) {
+        if (mInAmbientMode == enabled) return;
+        mInAmbientMode = enabled;
+        Set<AmbientModeStateProvider.Listener> copy = new HashSet<>(mAmbientModeListeners);
+        for (AmbientModeStateProvider.Listener listener : copy) {
+            listener.onAmbientModeStateChanged();
+        }
     }
 }

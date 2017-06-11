@@ -90,12 +90,14 @@ public class MainActivity extends WearableActivity implements MessageListener {
     @Override
     public void onEnterAmbient(Bundle ambientDetails) {
         super.onEnterAmbient(ambientDetails);
+        ((App) getApplicationContext()).setIsInAmbientMode(true);
         updateDisplay();
     }
 
     @Override
     public void onExitAmbient() {
         super.onExitAmbient();
+        ((App) getApplicationContext()).setIsInAmbientMode(false);
         updateDisplay();
     }
 

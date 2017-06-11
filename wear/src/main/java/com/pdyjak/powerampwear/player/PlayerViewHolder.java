@@ -12,7 +12,7 @@ import com.pdyjak.powerampwear.custom_views.CircularProgressbar;
 
 class PlayerViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener, PlayerViewModel.CommonEventsListener,
-        PlayerViewModel.ClockSettingListener, PlayerViewModel.TrackPositionListener {
+        PlayerViewModel.UiElementsVisibilityListener, PlayerViewModel.TrackPositionListener {
 
     private static final int PLAY_PAUSE_TAG = 0;
     private static final int PREV_SONG_TAG = 1;
@@ -43,7 +43,7 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         super(view);
         mViewModel = viewModel;
         mViewModel.addListenerWeakly((PlayerViewModel.CommonEventsListener) this);
-        mViewModel.addListenerWeakly((PlayerViewModel.ClockSettingListener) this);
+        mViewModel.addListenerWeakly((PlayerViewModel.UiElementsVisibilityListener) this);
         mViewModel.setTrackPositionListenerWeakly(this);
         mProgressSpinner = view.findViewById(R.id.progress_spinner);
         mErrorContainer = view.findViewById(R.id.error_container);
@@ -78,7 +78,8 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         onStateChanged();
         onPauseChanged();
         onTrackInfoChanged();
-        onClockSettingChanged();
+        onClockVisibilityChanged();
+        onProgressbarVisibilityChanged();
     }
 
     @Override
@@ -143,8 +144,13 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     }
 
     @Override
-    public void onClockSettingChanged() {
-        mClock.setVisibility(mViewModel.showClock() ? View.VISIBLE : View.GONE);
+    public void onClockVisibilityChanged() {
+        mClock.setVisibility(mViewModel.shouldShowClock() ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onProgressbarVisibilityChanged() {
+        mProgressbar.setVisibility(mViewModel.shouldShowProgressbar() ? View.VISIBLE : View.GONE);
     }
 
     @Override

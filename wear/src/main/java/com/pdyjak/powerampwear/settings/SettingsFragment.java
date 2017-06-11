@@ -34,7 +34,7 @@ public class SettingsFragment extends Fragment {
         });
 
         CheckBox clockCheckBox = (CheckBox) view.findViewById(R.id.clock_checkbox);
-        clockCheckBox.setChecked(getSettingsManager().showClock());
+        clockCheckBox.setChecked(getSettingsManager().shouldShowClock());
         clockCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
