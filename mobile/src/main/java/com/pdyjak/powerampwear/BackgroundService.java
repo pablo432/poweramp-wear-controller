@@ -9,8 +9,11 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -52,8 +55,24 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener {
 
     private static final String PROCESS_POWERAMP_EVENTS_CAPABILITY_NAME = "process_poweramp_events";
-    private static final int WAKE_LOCK_TIMEOUT = 2000;
+    private static final int WAKE_LOCK_TIMEOUT = 1500;
 
+    @NonNull
+    private final IBackgroundService.Stub mBinder = new IBackgroundService.Stub() {
+        @Override
+        public void setShowAlbumArt(final boolean show) throws RemoteException {
+            Handler handler = getHandler();
+            if (handler == null) return;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setShouldShowAlbumArt(show);
+                }
+            });
+        }
+    };
+
+    private Handler mHandler;
     private Intent mTrackIntent;
     private Intent mStatusIntent;
     private Intent mAlbumArtIntent;
@@ -66,6 +85,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     private TrackChangedEvent mPreviousEvent;
     private TracksProvider mTracksProvider;
     private boolean mReceiversRegistered;
+    private boolean mShouldShowAlbumArt;
 
     @NonNull
     private final BroadcastReceiver mTrackReceiver = new BroadcastReceiver() {
@@ -114,7 +134,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -126,6 +146,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     public void onCreate() {
         super.onCreate();
         if (BuildConfig.ENABLE_CRASH_REPORTING) FirebaseApp.initializeApp(this);
+        mShouldShowAlbumArt = ((App) this.getApplication()).shouldShowAlbumArt();
         mTracksProvider = new TracksProvider(getContentResolver());
         mGoogleApiClient = new GoogleApiClient.Builder(this, this, this)
                 .addApi(Wearable.API)
@@ -152,6 +173,19 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         mConnectionState = ConnectionState.FailedToConnect;
+    }
+
+    private Handler getHandler() {
+        if (mHandler == null) {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
+        return mHandler;
+    }
+
+    private void setShouldShowAlbumArt(boolean shouldShow) {
+        if (mShouldShowAlbumArt == shouldShow) return;
+        mShouldShowAlbumArt = shouldShow;
+        processAlbumArtIntent();
     }
 
     /*
@@ -224,7 +258,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 && (!equals(mPreviousEvent.album, event.album)
                 || !equals(mPreviousEvent.artist, event.artist));
         mPreviousEvent = event;
-        if (requestedByWearable || artistAlbumChanged) wakeScreen();
+        if (mShouldShowAlbumArt && (requestedByWearable || artistAlbumChanged)) wakeScreen();
         send(TrackChangedEvent.PATH, event);
     }
 
@@ -261,12 +295,14 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
             // Intents will be processed after GoogleApiClient successfully connects.
             return;
         }
-        Bitmap bmp = mAlbumArtIntent.getParcelableExtra(PowerampAPI.ALBUM_ART_BITMAP);
         byte[] bytes = null;
-        if (bmp != null) {
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.WEBP, 80, stream);
-            bytes = stream.toByteArray();
+        if (mShouldShowAlbumArt) {
+            Bitmap bmp = mAlbumArtIntent.getParcelableExtra(PowerampAPI.ALBUM_ART_BITMAP);
+            if (bmp != null) {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.WEBP, 80, stream);
+                bytes = stream.toByteArray();
+            }
         }
         send(AlbumArtChangedEvent.PATH, new AlbumArtChangedEvent(bytes));
     }

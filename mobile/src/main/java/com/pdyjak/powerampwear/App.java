@@ -9,6 +9,7 @@ import com.google.firebase.FirebaseApp;
 
 public class App extends Application {
     private static final String ONBOARDING_COMPLETED_KEY = "onboarding_completed";
+    private static final String SHOW_ALBUM_ART_KEY = "show_albumart";
 
     @Override
     public void onCreate() {
@@ -27,5 +28,13 @@ public class App extends Application {
 
     public void saveOnboardingCompleted() {
         getPrefs().edit().putBoolean(ONBOARDING_COMPLETED_KEY, true).apply();
+    }
+
+    public boolean shouldShowAlbumArt() {
+        return getPrefs().getBoolean(SHOW_ALBUM_ART_KEY, true);
+    }
+
+    public void saveShouldShowAlbumArt(boolean value) {
+        getPrefs().edit().putBoolean(SHOW_ALBUM_ART_KEY, value).apply();
     }
 }

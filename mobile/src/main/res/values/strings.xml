@@ -23,4 +23,6 @@
     <string name="service_restarted">Service restarted</string>
     <string name="okay">Okay!</string>
     <string name="wait_for_wearable_installation">You are almost ready to go. Just give your devices a few minutes until wearable version of application will be installed on your smartwatch.</string>
+    <string name="display_album_art">Display album art</string>
+    <string name="display_album_art_hint">Poweramp Music Player won\'t refresh album art, while device is locked. When enabled, the screen will turn on for a while when changing tracks, just to refresh album art.</string>
 </resources>

@@ -29,12 +29,44 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/restart_service"
+            android:textColor="@android:color/black"
             android:textSize="18sp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/restart_service_hint"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="#ccc"/>
+
+    <LinearLayout
+        android:id="@+id/show_albumart"
+        android:padding="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <CheckBox
+            android:id="@+id/albumart_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/display_album_art"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/albumart_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/display_album_art_hint"/>
 
     </LinearLayout>
 
