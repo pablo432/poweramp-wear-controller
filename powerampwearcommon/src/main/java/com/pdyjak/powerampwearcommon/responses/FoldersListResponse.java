@@ -27,11 +27,6 @@ public class FoldersListResponse implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static FoldersListResponse fromBytes(@NonNull byte[] bytes) {
         return BytesHelper.fromBytes(bytes, FoldersListResponse.class);
     }

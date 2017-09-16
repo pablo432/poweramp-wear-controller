@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BrowserRVAdapter<T> extends RecyclerView.Adapter<ItemViewHolder> {
@@ -23,6 +24,11 @@ public class BrowserRVAdapter<T> extends RecyclerView.Adapter<ItemViewHolder> {
         mItems.clear();
         mItems.addAll(items);
         notifyDataSetChanged();
+    }
+
+    @NonNull
+    public List<T> getItems() {
+        return Collections.unmodifiableList(mItems);
     }
 
     @Override

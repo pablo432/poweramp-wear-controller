@@ -32,7 +32,8 @@ public class PlayerComboFragment extends android.app.Fragment
         super.onCreate(savedInstanceState);
         App app = (App) getActivity().getApplicationContext();
         mPlayerViewModel = new PlayerViewModel(app.getSettingsManager(),
-                app.getMessageExchangeHelper(), app);
+                app.getMessageExchangeHelper(), app,
+                app.getMusicLibraryNavigator());
     }
 
     @Override

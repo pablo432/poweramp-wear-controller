@@ -19,11 +19,6 @@ public class TrackPositionSyncEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static TrackPositionSyncEvent fromBytes(@NonNull byte[] bytes) {
         return BytesHelper.fromBytes(bytes, TrackPositionSyncEvent.class);
     }

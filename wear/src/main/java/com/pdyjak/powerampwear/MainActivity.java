@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 
 import com.google.android.gms.wearable.MessageEvent;
 import com.pdyjak.powerampwear.music_browser.files.FileItem;
+import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
 import com.pdyjak.powerampwearcommon.events.AlbumArtChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
 
@@ -25,8 +27,15 @@ public class MainActivity extends WearableActivity implements MessageListener {
 
     private class MusicBrowserListener extends MusicBrowserListenerAdapter {
         @Override
-        public void onFileSelected(@NonNull FileItem item) {
+        public void onFileSelected(@NonNull FileItem item, boolean fromPlayer) {
             mShouldNavigateToPlayerView = true;
+        }
+
+        @Override
+        public void onFolderSelected(@NonNull FolderItem item, boolean fromPlayer,
+                                     @Nullable String scrollTo) {
+            if (!fromPlayer) return;
+            mViewPager.setCurrentItem(1, true);
         }
     }
 

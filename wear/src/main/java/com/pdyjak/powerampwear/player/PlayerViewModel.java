@@ -9,12 +9,17 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.maxmpz.poweramp.player.PowerampAPI;
 import com.pdyjak.powerampwear.MessageExchangeHelper;
 import com.pdyjak.powerampwear.MessageListener;
+import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
+import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
 import com.pdyjak.powerampwear.settings.SettingsManager;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackPositionSyncEvent;
+import com.pdyjak.powerampwearcommon.requests.FindParentRequest;
 import com.pdyjak.powerampwearcommon.requests.RequestsPaths;
+import com.pdyjak.powerampwearcommon.responses.FindParentResponse;
+import com.pdyjak.powerampwearcommon.responses.Parent;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -29,6 +34,7 @@ class PlayerViewModel implements MessageListener {
 
     private static final int REPEAT_MAX_LEVEL = 3;
     private static final int SHUFFLE_MAX_LEVEL = 4;
+
 
     interface UiElementsVisibilityListener {
         void onClockVisibilityChanged();
@@ -121,6 +127,8 @@ class PlayerViewModel implements MessageListener {
     @NonNull
     private final AmbientModeStateProvider mAmbientModeStateProvider;
     @NonNull
+    private final MusicLibraryNavigator mMusicLibraryNavigator;
+    @NonNull
     private final SettingsListener mClockSettingListener = new SettingsListener();
     @NonNull
     private final AmbientModeListener mAmbientModeListener = new AmbientModeListener();
@@ -173,11 +181,13 @@ class PlayerViewModel implements MessageListener {
     private int mCurrentTrackPosition;
 
     PlayerViewModel(@NonNull SettingsManager settingsManager,
-            @NonNull MessageExchangeHelper helper,
-            @NonNull AmbientModeStateProvider ambientModeStateProvider) {
+                    @NonNull MessageExchangeHelper helper,
+                    @NonNull AmbientModeStateProvider ambientModeStateProvider,
+                    @NonNull MusicLibraryNavigator musicLibraryNavigator) {
         mSettingsManager = settingsManager;
         mMessageExchangeHelper = helper;
         mAmbientModeStateProvider = ambientModeStateProvider;
+        mMusicLibraryNavigator = musicLibraryNavigator;
         mShouldShowClock = mSettingsManager.shouldShowClock();
         mInAmbientMode = mAmbientModeStateProvider.isInAmbientMode();
     }
@@ -320,8 +330,13 @@ class PlayerViewModel implements MessageListener {
                 processTrackPositionSyncInfo(TrackPositionSyncEvent.fromBytes(
                         messageEvent.getData()));
                 break;
+
+            case FindParentResponse.PATH:
+                goToLibrary(FindParentResponse.fromBytes(messageEvent.getData()));
+                break;
         }
     }
+
 
     private void processTrackPositionSyncInfo(
             @NonNull TrackPositionSyncEvent trackPositionSyncEvent) {
@@ -411,6 +426,17 @@ class PlayerViewModel implements MessageListener {
 
     void volumeUp() {
         mMessageExchangeHelper.sendRequest(RequestsPaths.VOLUME_UP);
+    }
+
+    void goToLibrary() {
+        FindParentRequest request = new FindParentRequest(FindParentRequest.PARENT_FOLDER);
+        mMessageExchangeHelper.sendRequest(FindParentRequest.PATH, request);
+    }
+
+    private void goToLibrary(@NonNull FindParentResponse filesListResponse) {
+        Parent parent = filesListResponse.parent;
+        FolderItem folderItem = new FolderItem(mMusicLibraryNavigator, parent.id, null, null);
+        mMusicLibraryNavigator.selectFolder(folderItem, true, filesListResponse.title);
     }
 
     private void setState(@NonNull State state) {

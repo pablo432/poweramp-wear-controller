@@ -15,9 +15,4 @@ public class AlbumArtChangedEvent implements Message {
     public byte[] toBytes() {
         return mBytes;
     }
-
-    @Override
-    public String getPath() {
-        return PATH;
-    }
 }

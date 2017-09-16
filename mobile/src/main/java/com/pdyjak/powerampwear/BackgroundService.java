@@ -16,6 +16,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,6 +34,7 @@ import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
 import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackPositionSyncEvent;
+import com.pdyjak.powerampwearcommon.requests.FindParentRequest;
 import com.pdyjak.powerampwearcommon.requests.GetAlbumsRequest;
 import com.pdyjak.powerampwearcommon.requests.GetFilesRequest;
 import com.pdyjak.powerampwearcommon.requests.PlaySongRequest;
@@ -40,10 +42,12 @@ import com.pdyjak.powerampwearcommon.requests.RequestsPaths;
 import com.pdyjak.powerampwearcommon.responses.AlbumsResponse;
 import com.pdyjak.powerampwearcommon.responses.ArtistsResponse;
 import com.pdyjak.powerampwearcommon.responses.FilesListResponse;
+import com.pdyjak.powerampwearcommon.responses.FindParentResponse;
 import com.pdyjak.powerampwearcommon.responses.FoldersListResponse;
 import com.pdyjak.powerampwearcommon.responses.Parent;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.Set;
 
 /**
@@ -263,18 +267,8 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
             // Intents will be processed after GoogleApiClient successfully connects.
             return;
         }
-        Bundle currentTrack = mTrackIntent.getBundleExtra(PowerampAPI.TRACK);
-        if (currentTrack == null) return;
-        TrackChangedEvent event = new TrackChangedEvent(
-                currentTrack.getString(PowerampAPI.Track.TITLE),
-                currentTrack.getString(PowerampAPI.Track.ARTIST),
-                currentTrack.getString(PowerampAPI.Track.ALBUM),
-                currentTrack.getInt(PowerampAPI.Track.POSITION),
-                currentTrack.getInt(PowerampAPI.Track.DURATION),
-                currentTrack.getInt(PowerampAPI.Track.SAMPLE_RATE),
-                currentTrack.getInt(PowerampAPI.Track.BITRATE),
-                currentTrack.getString(PowerampAPI.Track.CODEC)
-        );
+        TrackChangedEvent event = getTrackChangedEvent();
+        if (event == null) return;
         boolean artistAlbumChanged = mPreviousEvent != null
                 && (!equals(mPreviousEvent.album, event.album)
                 || !equals(mPreviousEvent.artist, event.artist));
@@ -284,6 +278,23 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
             wakeScreen();
         }
         send(TrackChangedEvent.PATH, event);
+    }
+
+    @Nullable
+    private TrackChangedEvent getTrackChangedEvent() {
+        if (mTrackIntent == null) return null;
+        Bundle currentTrack = mTrackIntent.getBundleExtra(PowerampAPI.TRACK);
+        if (currentTrack == null) return null;
+        return new TrackChangedEvent(
+                currentTrack.getString(PowerampAPI.Track.TITLE),
+                currentTrack.getString(PowerampAPI.Track.ARTIST),
+                currentTrack.getString(PowerampAPI.Track.ALBUM),
+                currentTrack.getInt(PowerampAPI.Track.POSITION),
+                currentTrack.getInt(PowerampAPI.Track.DURATION),
+                currentTrack.getInt(PowerampAPI.Track.SAMPLE_RATE),
+                currentTrack.getInt(PowerampAPI.Track.BITRATE),
+                currentTrack.getString(PowerampAPI.Track.CODEC)
+        );
     }
 
     private void wakeScreen() {
@@ -436,6 +447,10 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
             case PlaySongRequest.PATH:
                 processPlaySongRequest(messageEvent);
                 break;
+
+            case FindParentRequest.PATH:
+                findParent(messageEvent);
+                break;
         }
     }
 
@@ -490,6 +505,30 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         }
         builder.appendEncodedPath("files").appendEncodedPath(request.trackId);
         callPowerAmpAction(PowerampAPI.Commands.OPEN_TO_PLAY, builder.build());
+    }
+
+    private void findParent(@NonNull MessageEvent messageEvent) {
+        byte[] bytes = messageEvent.getData();
+        if (bytes == null) return;
+        FindParentRequest request = FindParentRequest.fromBytes(bytes);
+        switch (request.parent) {
+            case FindParentRequest.PARENT_FOLDER:
+                findFilesInCurrentDirectory();
+                break;
+        }
+    }
+
+    private void findFilesInCurrentDirectory() {
+        if (mTrackIntent == null) return;
+        Bundle track = mTrackIntent.getBundleExtra(PowerampAPI.TRACK);
+        if (track == null) return;
+        String path = track.getString(PowerampAPI.Track.PATH);
+        if (TextUtils.isEmpty(path)) return;
+        File current = new File(path);
+        FindParentResponse response = mTracksProvider.getDirectoryInfo(current.getParentFile(),
+                track.getString(PowerampAPI.Track.TITLE));
+        if (response == null) return;
+        send(FindParentResponse.PATH, response);
     }
 
     private void processAllIntents(boolean requestedByWearable) {

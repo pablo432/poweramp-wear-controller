@@ -48,11 +48,16 @@ public class FilesBrowserFragment extends BrowserFragmentBase implements Message
     @Override
     protected boolean tryRestoreCachedItems() {
         FilesListResponse cached = getMusicLibraryCache().getFilesList(mParent);
-        if (cached != null) {
-            setItems(transform(cached));
-            return true;
-        }
-        return false;
+        if (cached == null) return false;
+        setItems(transform(cached));
+        return true;
+    }
+
+    @Override
+    protected boolean shouldScrollTo(@NonNull Clickable item, @NonNull String scrollDest) {
+        if (!(item instanceof FileItem)) return false;
+        FileItem fileItem = (FileItem) item;
+        return fileItem.title != null && fileItem.title.startsWith(scrollDest);
     }
 
     @Override
@@ -65,6 +70,15 @@ public class FilesBrowserFragment extends BrowserFragmentBase implements Message
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        ensureParent();
+    }
+
+    @Override
+    protected void onGoingToRefresh() {
+        ensureParent();
+    }
+
+    private void ensureParent() {
         Bundle args = getArguments();
         if (args == null) {
             throw new IllegalArgumentException("Should never happen");

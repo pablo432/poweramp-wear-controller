@@ -17,11 +17,6 @@ public class RepeatModeChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static RepeatModeChangedEvent fromBytes(byte[] bytes) {
         return BytesHelper.fromBytes(bytes, RepeatModeChangedEvent.class);
     }

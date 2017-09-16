@@ -21,11 +21,6 @@ public class PlayingModeChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static PlayingModeChangedEvent fromBytes(@NonNull byte[] bytes) {
         return BytesHelper.fromBytes(bytes, PlayingModeChangedEvent.class);
     }

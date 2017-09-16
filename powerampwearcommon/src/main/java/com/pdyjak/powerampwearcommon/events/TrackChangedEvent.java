@@ -32,11 +32,6 @@ public class TrackChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static TrackChangedEvent fromBytes(byte[] bytes) {
         return BytesHelper.fromBytes(bytes, TrackChangedEvent.class);
     }

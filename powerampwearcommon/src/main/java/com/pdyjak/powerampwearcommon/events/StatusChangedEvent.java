@@ -19,11 +19,6 @@ public class StatusChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static StatusChangedEvent fromBytes(byte[] bytes) {
         return BytesHelper.fromBytes(bytes, StatusChangedEvent.class);
     }

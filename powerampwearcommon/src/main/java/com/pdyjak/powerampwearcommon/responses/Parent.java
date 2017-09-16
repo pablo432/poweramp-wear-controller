@@ -33,6 +33,11 @@ public class Parent implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return type.value + "_" + id;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

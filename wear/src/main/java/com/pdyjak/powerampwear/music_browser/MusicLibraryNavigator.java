@@ -1,6 +1,7 @@
 package com.pdyjak.powerampwear.music_browser;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem;
 import com.pdyjak.powerampwear.music_browser.artists.ArtistItem;
@@ -22,18 +23,19 @@ import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
  */
 public interface MusicLibraryNavigator {
     interface Listener {
-        void onCategorySelected(@NonNull CategoryItem item);
-        void onFolderSelected(@NonNull FolderItem item);
-        void onAlbumSelected(@NonNull AlbumItem item);
-        void onArtistSelected(@NonNull ArtistItem item);
-        void onFileSelected(@NonNull FileItem item);
+        void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer);
+        void onFolderSelected(@NonNull FolderItem item, boolean fromPlayer,
+                              @Nullable String scrollTo);
+        void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer);
+        void onArtistSelected(@NonNull ArtistItem item, boolean fromPlayer);
+        void onFileSelected(@NonNull FileItem item, boolean fromPlayer);
     }
 
-    void selectCategory(@NonNull CategoryItem item);
-    void selectFolder(@NonNull FolderItem item);
-    void selectAlbum(@NonNull AlbumItem item);
-    void selectFile(@NonNull FileItem item);
-    void selectArtist(@NonNull ArtistItem item);
+    void selectCategory(@NonNull CategoryItem item, boolean fromPlayer);
+    void selectFolder(@NonNull FolderItem item, boolean fromPlayer, @Nullable String scrollTo);
+    void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer);
+    void selectFile(@NonNull FileItem item, boolean fromPlayer);
+    void selectArtist(@NonNull ArtistItem item, boolean fromPlayer);
     void addLibraryNavigationListener(@NonNull Listener listener);
     void removeLibraryNavigationListener(@NonNull Listener listener);
 }

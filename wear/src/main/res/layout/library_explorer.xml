@@ -7,18 +7,19 @@
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <ImageView
         android:id="@+id/back_arrow"
-        android:layout_width="match_parent"
-        android:layout_height="32dp"
-        android:layout_gravity="top"
-        android:background="#fff"
-        android:alpha="0.5"
-        android:padding="6dp"
+        android:layout_width="@dimen/back_button_size"
+        android:layout_height="@dimen/back_button_size"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="3dp"
+        android:alpha="0.95"
+        android:background="@drawable/back_button_bg"
+        android:padding="9dp"
         android:src="@drawable/ic_arrow_back_white"
         android:tint="#000"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 </FrameLayout>

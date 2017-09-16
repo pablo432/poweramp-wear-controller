@@ -17,11 +17,6 @@ public class ShuffleModeChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static ShuffleModeChangedEvent fromBytes(byte[] bytes) {
         return BytesHelper.fromBytes(bytes, ShuffleModeChangedEvent.class);
     }

@@ -37,7 +37,7 @@ public class FileItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectFile(this);
+        mMusicLibraryNavigator.selectFile(this, false);
     }
 
     @Override

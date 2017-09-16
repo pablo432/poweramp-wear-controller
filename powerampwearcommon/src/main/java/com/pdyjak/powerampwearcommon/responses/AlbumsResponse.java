@@ -32,11 +32,6 @@ public class AlbumsResponse implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static AlbumsResponse fromBytes(@NonNull byte[] bytes) {
         return BytesHelper.fromBytes(bytes, AlbumsResponse.class);
     }

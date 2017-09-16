@@ -19,11 +19,6 @@ public class PositionChangedEvent implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static PositionChangedEvent fromBytes(byte[] bytes) {
         return BytesHelper.fromBytes(bytes, PositionChangedEvent.class);
     }

@@ -1,6 +1,7 @@
 package com.pdyjak.powerampwear;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem;
@@ -18,42 +19,43 @@ public class MusicLibraryNavigatorImpl implements MusicLibraryNavigator {
     private final Set<MusicLibraryNavigator.Listener> mMusicBrowserListeners = new HashSet<>();
 
     @Override
-    public void selectCategory(@NonNull CategoryItem item) {
+    public void selectCategory(@NonNull CategoryItem item, boolean fromPlayer) {
         Set<Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onCategorySelected(item);
+            listener.onCategorySelected(item, fromPlayer);
         }
     }
 
     @Override
-    public void selectFolder(@NonNull FolderItem item) {
+    public void selectFolder(@NonNull FolderItem item, boolean fromPlayer,
+                             @Nullable String scrollTo) {
         Set<MusicLibraryNavigator.Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onFolderSelected(item);
+            listener.onFolderSelected(item, fromPlayer, scrollTo);
         }
     }
 
     @Override
-    public void selectAlbum(@NonNull AlbumItem item) {
+    public void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer) {
         Set<MusicLibraryNavigator.Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onAlbumSelected(item);
+            listener.onAlbumSelected(item, fromPlayer);
         }
     }
 
     @Override
-    public void selectFile(@NonNull FileItem item) {
+    public void selectFile(@NonNull FileItem item, boolean fromPlayer) {
         Set<MusicLibraryNavigator.Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onFileSelected(item);
+            listener.onFileSelected(item, fromPlayer);
         }
     }
 
     @Override
-    public void selectArtist(@NonNull ArtistItem item) {
+    public void selectArtist(@NonNull ArtistItem item, boolean fromPlayer) {
         Set<MusicLibraryNavigator.Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onArtistSelected(item);
+            listener.onArtistSelected(item, fromPlayer);
         }
     }
 

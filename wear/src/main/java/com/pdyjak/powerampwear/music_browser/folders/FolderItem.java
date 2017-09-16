@@ -17,8 +17,8 @@ public class FolderItem implements Clickable {
     @Nullable
     final String parentName;
 
-    FolderItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @Nullable String name,
-            @Nullable String parentName) {
+    public FolderItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @Nullable String name,
+                      @Nullable String parentName) {
         mMusicLibraryNavigator = helper;
         this.id = id;
         this.name = name;
@@ -27,7 +27,7 @@ public class FolderItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectFolder(this);
+        mMusicLibraryNavigator.selectFolder(this, false, null);
     }
 
     @Override

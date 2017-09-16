@@ -26,7 +26,7 @@ public class CategoryItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectCategory(this);
+        mMusicLibraryNavigator.selectCategory(this, false);
     }
 
     @Override

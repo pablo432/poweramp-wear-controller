@@ -27,7 +27,7 @@ public class AlbumItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectAlbum(this);
+        mMusicLibraryNavigator.selectAlbum(this, false);
     }
 
     @Override

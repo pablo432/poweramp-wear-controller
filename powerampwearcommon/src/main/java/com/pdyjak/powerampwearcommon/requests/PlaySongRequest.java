@@ -25,11 +25,6 @@ public class PlaySongRequest implements Message {
         return BytesHelper.toBytes(this);
     }
 
-    @Override
-    public String getPath() {
-        return PATH;
-    }
-
     public static PlaySongRequest fromBytes(@NonNull byte[] bytes) {
         return BytesHelper.fromBytes(bytes, PlaySongRequest.class);
     }

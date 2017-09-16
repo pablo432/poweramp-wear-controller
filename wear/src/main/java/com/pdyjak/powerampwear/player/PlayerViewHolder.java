@@ -19,6 +19,7 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private static final int NEXT_SONG_TAG = 2;
     private static final int VOLUME_DOWN_TAG = 3;
     private static final int VOLUME_UP_TAG = 4;
+    private static final int TRACK_INFO_TAG = 5;
 
     @NonNull
     private final PlayerViewModel mViewModel;
@@ -28,6 +29,8 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private final View mErrorContainer;
     @NonNull
     private final View mPlayerViewRoot;
+    @NonNull
+    private final View mTrackInfoView;
     @NonNull
     private final TextView mTitleTextView;
     @NonNull
@@ -48,6 +51,10 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         mProgressSpinner = view.findViewById(R.id.progress_spinner);
         mErrorContainer = view.findViewById(R.id.error_container);
         mPlayerViewRoot = view.findViewById(R.id.player_root);
+
+        mTrackInfoView = view.findViewById(R.id.track_info);
+        mTrackInfoView.setTag(TRACK_INFO_TAG);
+        mTrackInfoView.setOnClickListener(this);
 
         mTitleTextView = (TextView) view.findViewById(R.id.title);
         mArtistAlbumTextView = (TextView) view.findViewById(R.id.artist_album);
@@ -103,6 +110,10 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
 
             case VOLUME_UP_TAG:
                 mViewModel.volumeUp();
+                break;
+
+            case TRACK_INFO_TAG:
+                mViewModel.goToLibrary();
                 break;
         }
     }

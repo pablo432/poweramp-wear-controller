@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.maxmpz.poweramp.player.PowerampAPI;
 import com.maxmpz.poweramp.player.TableDefs;
@@ -14,6 +15,7 @@ import com.pdyjak.powerampwearcommon.responses.Artist;
 import com.pdyjak.powerampwearcommon.responses.ArtistsResponse;
 import com.pdyjak.powerampwearcommon.responses.File;
 import com.pdyjak.powerampwearcommon.responses.FilesListResponse;
+import com.pdyjak.powerampwearcommon.responses.FindParentResponse;
 import com.pdyjak.powerampwearcommon.responses.Folder;
 import com.pdyjak.powerampwearcommon.responses.FoldersListResponse;
 import com.pdyjak.powerampwearcommon.responses.Parent;
@@ -36,7 +38,31 @@ class TracksProvider {
     }
 
     @Nullable
+    FindParentResponse getDirectoryInfo(@NonNull java.io.File file, @Nullable String title) {
+        String folderName = file.getName();
+        if (TextUtils.isEmpty(folderName)) return null;
+        List<Folder> folders = getFolders();
+        if (folders == null) return null;
+        Folder candidate = null;
+        for (Folder folder : folders) {
+            if (folderName.equals(folder.name)) {
+                candidate = folder;
+                break;
+            }
+        }
+        if (candidate == null) return null;
+        return new FindParentResponse(new Parent(candidate.id, Parent.Type.Folder), title);
+    }
+
+    @Nullable
     FoldersListResponse getAvailableFolders() {
+        List<Folder> folders = getFolders();
+        if (folders == null) return null;
+        return new FoldersListResponse(folders);
+    }
+
+    @Nullable
+    private List<Folder> getFolders() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("folders")
                 .build();
@@ -49,7 +75,7 @@ class TracksProvider {
             folders.add(new Folder(c.getString(0), c.getString(1), c.getString(2)));
         }
         c.close();
-        return new FoldersListResponse(folders);
+        return folders;
     }
 
     @Nullable
