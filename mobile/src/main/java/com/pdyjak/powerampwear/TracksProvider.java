@@ -35,6 +35,7 @@ class TracksProvider {
         mContentResolver = contentResolver;
     }
 
+    @Nullable
     FoldersListResponse getAvailableFolders() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("folders")
@@ -51,6 +52,7 @@ class TracksProvider {
         return new FoldersListResponse(folders);
     }
 
+    @Nullable
     AlbumsResponse getAlbums(@Nullable Parent parent) {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("artists_albums")
@@ -68,13 +70,14 @@ class TracksProvider {
             String albumId = c.getString(1);
             String artistId = c.getString(2);
             String albumName = getAlbumNameById(albumId);
-            String artist = getArtistNameById(artistId);
-            albums.add(new Album(albumId, albumName, artist));
+            String artist = optional(getArtistNameById(artistId), "");
+            if (albumName != null) albums.add(new Album(albumId, albumName, artist));
         }
         c.close();
         return new AlbumsResponse(parent, albums);
     }
 
+    @Nullable
     ArtistsResponse getArtists() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("artists")
@@ -95,6 +98,7 @@ class TracksProvider {
         return new ArtistsResponse(artists);
     }
 
+    @Nullable
     FilesListResponse getAllTracks() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("files")
@@ -104,6 +108,7 @@ class TracksProvider {
         return new FilesListResponse(null, files);
     }
 
+    @Nullable
     FilesListResponse getFilesInDirectory(@NonNull String folderId) {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("folders")
@@ -116,6 +121,7 @@ class TracksProvider {
         return new FilesListResponse(parent, files);
     }
 
+    @Nullable
     FilesListResponse getFilesInAlbum(@NonNull String albumId) {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("albums")
@@ -128,6 +134,7 @@ class TracksProvider {
         return new FilesListResponse(parent, files);
     }
 
+    @Nullable
     private List<File> extractFiles(@NonNull Uri uri) {
         Cursor c = mContentResolver.query(uri, new String[] {
                 TableDefs.Files._ID, TableDefs.Files.TITLE_TAG, TableDefs.Files.ARTIST_ID,
@@ -139,9 +146,9 @@ class TracksProvider {
             String fileId = c.getString(0);
             String title = c.getString(1);
             String artistId = c.getString(2);
-            String artist = getArtistNameById(artistId);
+            String artist = optional(getArtistNameById(artistId), "");
             String albumId = c.getString(3);
-            String album = getAlbumNameById(albumId);
+            String album = optional(getAlbumNameById(albumId), "");
             long duration = c.getLong(4) / 1000;
             files.add(new File(fileId, title, artist, album, duration));
         }
@@ -149,6 +156,7 @@ class TracksProvider {
         return files;
     }
 
+    @Nullable
     private String getArtistNameById(@NonNull String id) {
         String cached = mArtistCache.get(id);
         if (cached != null) return cached;
@@ -160,6 +168,7 @@ class TracksProvider {
         return value;
     }
 
+    @Nullable
     private String getAlbumNameById(@NonNull String id) {
         String cached = mAlbumCache.get(id);
         if (cached != null) return cached;
@@ -171,21 +180,32 @@ class TracksProvider {
         return value;
     }
 
+    @Nullable
     private String getStringById(
             @NonNull String id,
             @NonNull String table,
             @NonNull String idColumnName,
             @NonNull String wantedColumn) {
-        Uri uri = PowerampAPI.ROOT_URI.buildUpon()
-                .appendEncodedPath(table)
-                .build();
-        Cursor c = mContentResolver.query(uri, new String[] {
-                idColumnName, wantedColumn
-        }, idColumnName + "=?", new String[] {id}, null);
-        if (c == null) return null;
-        String name = null;
-        if (c.moveToFirst()) name = c.getString(1);
-        c.close();
-        return name;
+        // oh boy
+        try {
+            Uri uri = PowerampAPI.ROOT_URI.buildUpon()
+                    .appendEncodedPath(table)
+                    .build();
+            Cursor c = mContentResolver.query(uri, new String[] {
+                    idColumnName, wantedColumn
+            }, idColumnName + "=?", new String[] {id}, null);
+            if (c == null) return null;
+            String name = null;
+            if (c.moveToFirst()) name = c.getString(1);
+            c.close();
+            return name;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    @NonNull
+    private static <T> T optional(@Nullable T value, @NonNull T fallback) {
+        return value != null ? value : fallback;
     }
 }
