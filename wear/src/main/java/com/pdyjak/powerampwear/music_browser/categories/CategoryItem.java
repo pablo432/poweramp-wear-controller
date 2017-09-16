@@ -16,8 +16,8 @@ public class CategoryItem implements Clickable {
     final int stringId;
     final int iconId;
 
-    CategoryItem(@NonNull MusicLibraryNavigator helper, @NonNull String path, @StringRes int stringId,
-            @DrawableRes int iconId) {
+    public CategoryItem(@NonNull MusicLibraryNavigator helper, @NonNull String path,
+                        @StringRes int stringId, @DrawableRes int iconId) {
         mMusicLibraryNavigator = helper;
         this.path = path;
         this.stringId = stringId;
@@ -26,7 +26,7 @@ public class CategoryItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectCategory(this, false);
+        mMusicLibraryNavigator.selectCategory(this, false, null);
     }
 
     @Override

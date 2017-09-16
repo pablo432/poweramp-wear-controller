@@ -19,10 +19,11 @@ public class MusicLibraryNavigatorImpl implements MusicLibraryNavigator {
     private final Set<MusicLibraryNavigator.Listener> mMusicBrowserListeners = new HashSet<>();
 
     @Override
-    public void selectCategory(@NonNull CategoryItem item, boolean fromPlayer) {
+    public void selectCategory(@NonNull CategoryItem item, boolean fromPlayer,
+                               @Nullable String scrollTo) {
         Set<Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onCategorySelected(item, fromPlayer);
+            listener.onCategorySelected(item, fromPlayer, scrollTo);
         }
     }
 
@@ -36,10 +37,11 @@ public class MusicLibraryNavigatorImpl implements MusicLibraryNavigator {
     }
 
     @Override
-    public void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer) {
+    public void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer,
+                            @Nullable String scrollTo) {
         Set<MusicLibraryNavigator.Listener> copy = new HashSet<>(mMusicBrowserListeners);
         for (MusicLibraryNavigator.Listener listener : copy) {
-            listener.onAlbumSelected(item, fromPlayer);
+            listener.onAlbumSelected(item, fromPlayer, scrollTo);
         }
     }
 

@@ -510,25 +510,53 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     private void findParent(@NonNull MessageEvent messageEvent) {
         byte[] bytes = messageEvent.getData();
         if (bytes == null) return;
-        FindParentRequest request = FindParentRequest.fromBytes(bytes);
-        switch (request.parent) {
-            case FindParentRequest.PARENT_FOLDER:
-                findFilesInCurrentDirectory();
+        // Maybe there will be a better time to make use of it, ignore now
+        // FindParentRequest request = FindParentRequest.fromBytes(bytes);
+        Bundle bundle = mTrackIntent == null ? null
+                : mTrackIntent.getBundleExtra(PowerampAPI.TRACK);
+        if (bundle == null) return;
+
+        int category = mTrackIntent.getBundleExtra(PowerampAPI.TRACK).getInt(PowerampAPI.Track.CAT);
+        FindParentResponse response = null;
+        boolean folderAttempted = false;
+        switch (category) {
+            case PowerampAPI.Cats.ROOT:
+                response = mTracksProvider.getAllTracks(bundle.getString(PowerampAPI.Track.TITLE));
+                break;
+
+            case PowerampAPI.Cats.ALBUMS:
+            case PowerampAPI.Cats.ARTISTS_ID_ALBUMS:
+                response = findFilesInCurrentAlbum(bundle);
+                break;
+
+            case PowerampAPI.Cats.FOLDERS:
+            // default:
+                response = findFilesInCurrentDirectory(bundle);
+                folderAttempted = true;
                 break;
         }
+        if (!folderAttempted && response == null) {
+            // Fallback to folders
+            response = findFilesInCurrentDirectory(bundle);
+        }
+        if (response != null) send(FindParentResponse.PATH, response);
     }
 
-    private void findFilesInCurrentDirectory() {
-        if (mTrackIntent == null) return;
-        Bundle track = mTrackIntent.getBundleExtra(PowerampAPI.TRACK);
-        if (track == null) return;
-        String path = track.getString(PowerampAPI.Track.PATH);
-        if (TextUtils.isEmpty(path)) return;
-        File current = new File(path);
-        FindParentResponse response = mTracksProvider.getDirectoryInfo(current.getParentFile(),
+    @Nullable
+    private FindParentResponse findFilesInCurrentAlbum(@NonNull Bundle track) {
+        String albumName = track.getString(PowerampAPI.Track.ALBUM);
+        if (albumName == null) return null;
+        return mTracksProvider.getFilesInCurrentAlbum(albumName,
                 track.getString(PowerampAPI.Track.TITLE));
-        if (response == null) return;
-        send(FindParentResponse.PATH, response);
+    }
+
+    @Nullable
+    private FindParentResponse findFilesInCurrentDirectory(@NonNull Bundle track) {
+        String path = track.getString(PowerampAPI.Track.PATH);
+        if (TextUtils.isEmpty(path)) return null;
+        File current = new File(path);
+        return mTracksProvider.getFilesInDirectory(current.getParentFile(),
+                track.getString(PowerampAPI.Track.TITLE));
     }
 
     private void processAllIntents(boolean requestedByWearable) {

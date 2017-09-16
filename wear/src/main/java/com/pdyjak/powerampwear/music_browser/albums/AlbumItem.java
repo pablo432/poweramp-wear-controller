@@ -17,7 +17,7 @@ public class AlbumItem implements Clickable {
     @Nullable
     final String artist;
 
-    AlbumItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @Nullable String name,
+    public AlbumItem(@NonNull MusicLibraryNavigator helper, @NonNull String id, @Nullable String name,
             @Nullable String artist) {
         mMusicLibraryNavigator = helper;
         this.id = id;
@@ -27,7 +27,7 @@ public class AlbumItem implements Clickable {
 
     @Override
     public void onClicked() {
-        mMusicLibraryNavigator.selectAlbum(this, false);
+        mMusicLibraryNavigator.selectAlbum(this, false, null);
     }
 
     @Override

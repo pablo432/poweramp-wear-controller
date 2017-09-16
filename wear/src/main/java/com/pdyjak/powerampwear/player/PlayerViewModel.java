@@ -10,6 +10,8 @@ import com.maxmpz.poweramp.player.PowerampAPI;
 import com.pdyjak.powerampwear.MessageExchangeHelper;
 import com.pdyjak.powerampwear.MessageListener;
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator;
+import com.pdyjak.powerampwear.music_browser.albums.AlbumItem;
+import com.pdyjak.powerampwear.music_browser.categories.CategoryItem;
 import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
 import com.pdyjak.powerampwear.settings.SettingsManager;
 import com.pdyjak.powerampwearcommon.events.PlayingModeChangedEvent;
@@ -17,6 +19,7 @@ import com.pdyjak.powerampwearcommon.events.StatusChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent;
 import com.pdyjak.powerampwearcommon.events.TrackPositionSyncEvent;
 import com.pdyjak.powerampwearcommon.requests.FindParentRequest;
+import com.pdyjak.powerampwearcommon.requests.GetFilesRequest;
 import com.pdyjak.powerampwearcommon.requests.RequestsPaths;
 import com.pdyjak.powerampwearcommon.responses.FindParentResponse;
 import com.pdyjak.powerampwearcommon.responses.Parent;
@@ -429,14 +432,32 @@ class PlayerViewModel implements MessageListener {
     }
 
     void goToLibrary() {
-        FindParentRequest request = new FindParentRequest(FindParentRequest.PARENT_FOLDER);
+        FindParentRequest request = new FindParentRequest(-1);
         mMessageExchangeHelper.sendRequest(FindParentRequest.PATH, request);
     }
 
-    private void goToLibrary(@NonNull FindParentResponse filesListResponse) {
-        Parent parent = filesListResponse.parent;
-        FolderItem folderItem = new FolderItem(mMusicLibraryNavigator, parent.id, null, null);
-        mMusicLibraryNavigator.selectFolder(folderItem, true, filesListResponse.title);
+    private void goToLibrary(@NonNull FindParentResponse response) {
+        Parent parent = response.parent;
+        if (parent == null) {
+            // All tracks
+            CategoryItem categoryItem = new CategoryItem(mMusicLibraryNavigator,
+                    GetFilesRequest.PATH, 0, 0);
+            mMusicLibraryNavigator.selectCategory(categoryItem, true, response.title);
+            return;
+        }
+
+        switch (parent.type) {
+            case Folder:
+                FolderItem folderItem = new FolderItem(mMusicLibraryNavigator, parent.id, null,
+                        null);
+                mMusicLibraryNavigator.selectFolder(folderItem, true, response.title);
+                break;
+
+            case Album:
+                AlbumItem albumItem = new AlbumItem(mMusicLibraryNavigator, parent.id, null, null);
+                mMusicLibraryNavigator.selectAlbum(albumItem, true, response.title);
+                break;
+        }
     }
 
     private void setState(@NonNull State state) {

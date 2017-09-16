@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.google.android.gms.wearable.MessageEvent;
+import com.pdyjak.powerampwear.music_browser.albums.AlbumItem;
+import com.pdyjak.powerampwear.music_browser.categories.CategoryItem;
 import com.pdyjak.powerampwear.music_browser.files.FileItem;
 import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
 import com.pdyjak.powerampwearcommon.events.AlbumArtChangedEvent;
@@ -34,6 +36,20 @@ public class MainActivity extends WearableActivity implements MessageListener {
         @Override
         public void onFolderSelected(@NonNull FolderItem item, boolean fromPlayer,
                                      @Nullable String scrollTo) {
+            if (!fromPlayer) return;
+            mViewPager.setCurrentItem(1, true);
+        }
+
+        @Override
+        public void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer,
+                                    @Nullable String scrollTo) {
+            if (!fromPlayer) return;
+            mViewPager.setCurrentItem(1, true);
+        }
+
+        @Override
+        public void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer,
+                                       @Nullable String scrollTo) {
             if (!fromPlayer) return;
             mViewPager.setCurrentItem(1, true);
         }

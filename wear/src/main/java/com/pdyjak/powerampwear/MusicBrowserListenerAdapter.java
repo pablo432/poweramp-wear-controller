@@ -12,7 +12,8 @@ import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
 
 class MusicBrowserListenerAdapter implements MusicLibraryNavigator.Listener {
     @Override
-    public void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer) {
+    public void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer,
+                                   @Nullable String scrollTo) {
     }
 
     @Override
@@ -21,7 +22,8 @@ class MusicBrowserListenerAdapter implements MusicLibraryNavigator.Listener {
     }
 
     @Override
-    public void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer) {
+    public void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer,
+                                @Nullable String scrollTo) {
     }
 
     @Override

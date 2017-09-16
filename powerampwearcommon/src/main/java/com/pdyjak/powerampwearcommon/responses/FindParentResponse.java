@@ -9,12 +9,12 @@ import com.pdyjak.powerampwearcommon.utils.BytesHelper;
 public class FindParentResponse implements Message {
     public static final String PATH = "/find_parent_response";
 
-    @NonNull
+    @Nullable
     public final Parent parent;
     @Nullable
     public final String title;
 
-    public FindParentResponse(@NonNull Parent parent, @Nullable String title) {
+    public FindParentResponse(@Nullable Parent parent, @Nullable String title) {
         this.parent = parent;
         this.title = title;
     }

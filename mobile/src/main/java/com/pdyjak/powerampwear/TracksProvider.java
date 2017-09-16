@@ -38,7 +38,30 @@ class TracksProvider {
     }
 
     @Nullable
-    FindParentResponse getDirectoryInfo(@NonNull java.io.File file, @Nullable String title) {
+    FindParentResponse getAllTracks(@Nullable String title) {
+        List<File> allTracks = getAllTracksInternal();
+        if (allTracks == null || allTracks.isEmpty()) return null;
+        return new FindParentResponse(null, title);
+    }
+
+    @Nullable
+    FindParentResponse getFilesInCurrentAlbum(@NonNull String albumName, @Nullable String title) {
+        if (TextUtils.isEmpty(albumName)) return null;
+        List<Album> albums = getAlbumsInternal(null);
+        if (albums == null || albums.isEmpty()) return null;
+        Album candidate = null;
+        for (Album album : albums) {
+            if (albumName.equals(album.name)) {
+                candidate = album;
+                break;
+            }
+        }
+        if (candidate == null) return null;
+        return new FindParentResponse(new Parent(candidate.id, Parent.Type.Album), title);
+    }
+
+    @Nullable
+    FindParentResponse getFilesInDirectory(@NonNull java.io.File file, @Nullable String title) {
         String folderName = file.getName();
         if (TextUtils.isEmpty(folderName)) return null;
         List<Folder> folders = getFolders();
@@ -80,6 +103,13 @@ class TracksProvider {
 
     @Nullable
     AlbumsResponse getAlbums(@Nullable Parent parent) {
+        List<Album> albums = getAlbumsInternal(parent);
+        if (albums == null) return null;
+        return new AlbumsResponse(parent, albums);
+    }
+
+    @Nullable
+    private List<Album> getAlbumsInternal(@Nullable Parent parent) {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("artists_albums")
                 .build();
@@ -100,7 +130,7 @@ class TracksProvider {
             if (albumName != null) albums.add(new Album(albumId, albumName, artist));
         }
         c.close();
-        return new AlbumsResponse(parent, albums);
+        return albums;
     }
 
     @Nullable
@@ -126,12 +156,17 @@ class TracksProvider {
 
     @Nullable
     FilesListResponse getAllTracks() {
+        List<File> files = getAllTracksInternal();
+        if (files == null) return null;
+        return new FilesListResponse(null, files);
+    }
+
+    @Nullable
+    private List<File> getAllTracksInternal() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("files")
                 .build();
-        List<File> files = extractFiles(uri);
-        if (files == null) return null;
-        return new FilesListResponse(null, files);
+        return extractFiles(uri);
     }
 
     @Nullable

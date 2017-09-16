@@ -92,7 +92,8 @@ public class LibraryExplorerFragment extends Fragment implements MusicLibraryNav
     }
 
     @Override
-    public void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer) {
+    public void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer,
+                                   @Nullable String scrollTo) {
         switch (item.path) {
             case RequestsPaths.GET_FOLDERS:
                 replaceFragment(new FoldersBrowserFragment(), false);
@@ -107,7 +108,7 @@ public class LibraryExplorerFragment extends Fragment implements MusicLibraryNav
                 break;
 
             case GetFilesRequest.PATH:
-                startFilesBrowser(null, false, null);
+                startFilesBrowser(null, false, scrollTo);
                 break;
         }
     }
@@ -120,9 +121,10 @@ public class LibraryExplorerFragment extends Fragment implements MusicLibraryNav
     }
 
     @Override
-    public void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer) {
+    public void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer,
+                                @Nullable String scrollTo) {
         Parent parent = new Parent(item.id, Parent.Type.Album);
-        startFilesBrowser(parent, fromPlayer, null);
+        startFilesBrowser(parent, fromPlayer, scrollTo);
     }
 
     @Override

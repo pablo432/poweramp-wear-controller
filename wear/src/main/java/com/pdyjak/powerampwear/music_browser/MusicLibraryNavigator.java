@@ -23,17 +23,19 @@ import com.pdyjak.powerampwear.music_browser.folders.FolderItem;
  */
 public interface MusicLibraryNavigator {
     interface Listener {
-        void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer);
+        void onCategorySelected(@NonNull CategoryItem item, boolean fromPlayer,
+                                @Nullable String scrollTo);
         void onFolderSelected(@NonNull FolderItem item, boolean fromPlayer,
                               @Nullable String scrollTo);
-        void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer);
+        void onAlbumSelected(@NonNull AlbumItem item, boolean fromPlayer,
+                             @Nullable String scrollTo);
         void onArtistSelected(@NonNull ArtistItem item, boolean fromPlayer);
         void onFileSelected(@NonNull FileItem item, boolean fromPlayer);
     }
 
-    void selectCategory(@NonNull CategoryItem item, boolean fromPlayer);
+    void selectCategory(@NonNull CategoryItem item, boolean fromPlayer, @Nullable String scrollTo);
     void selectFolder(@NonNull FolderItem item, boolean fromPlayer, @Nullable String scrollTo);
-    void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer);
+    void selectAlbum(@NonNull AlbumItem item, boolean fromPlayer, @Nullable String scrollTo);
     void selectFile(@NonNull FileItem item, boolean fromPlayer);
     void selectArtist(@NonNull ArtistItem item, boolean fromPlayer);
     void addLibraryNavigationListener(@NonNull Listener listener);
