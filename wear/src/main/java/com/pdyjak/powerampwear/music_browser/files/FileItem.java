@@ -16,6 +16,8 @@ public class FileItem implements Clickable {
     @NonNull
     public final String trackId;
     @Nullable
+    public final String contextualId;
+    @Nullable
     final String title;
     @Nullable
     final String artist;
@@ -24,8 +26,8 @@ public class FileItem implements Clickable {
     final long duration;
 
     FileItem(@NonNull MusicLibraryNavigator helper, @Nullable Parent parent,
-            @NonNull String trackId, @Nullable String title, @Nullable String artist,
-            @Nullable String album, long duration) {
+             @NonNull String trackId, @Nullable String title, @Nullable String artist,
+             @Nullable String album, long duration, @Nullable String contextualId) {
         mMusicLibraryNavigator = helper;
         this.parent = parent;
         this.trackId = trackId;
@@ -33,6 +35,7 @@ public class FileItem implements Clickable {
         this.artist = artist;
         this.album = album;
         this.duration = duration;
+        this.contextualId = contextualId;
     }
 
     @Override

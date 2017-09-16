@@ -112,7 +112,7 @@ public class FilesBrowserFragment extends BrowserFragmentBase implements Message
         List<Clickable> items = new ArrayList<>();
         for (File file : files) {
             items.add(new FileItem(navigator, response.parent, file.id, file.title, file.artist,
-                    file.album, file.duration));
+                    file.album, file.duration, file.contextualId));
         }
         return items;
     }

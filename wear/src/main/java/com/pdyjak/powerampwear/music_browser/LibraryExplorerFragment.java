@@ -153,7 +153,7 @@ public class LibraryExplorerFragment extends Fragment implements MusicLibraryNav
 
     @Override
     public void onFileSelected(@NonNull FileItem item, boolean fromPlayer) {
-        PlaySongRequest request = new PlaySongRequest(item.trackId, item.parent);
+        PlaySongRequest request = new PlaySongRequest(item.trackId, item.contextualId, item.parent);
         ((App) getActivity().getApplicationContext()).getMessageExchangeHelper().sendRequest(
                 PlaySongRequest.PATH, request);
     }

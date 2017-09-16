@@ -429,7 +429,8 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 break;
 
             case RequestsPaths.GET_FOLDERS:
-                send(FoldersListResponse.PATH, mTracksProvider.getAvailableFolders());
+                FoldersListResponse files = mTracksProvider.getAvailableFolders();
+                if (files != null) send(FoldersListResponse.PATH, files);
                 break;
 
             case RequestsPaths.GET_ARTISTS:
@@ -479,7 +480,12 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         Parent parent = request.parent;
         if (parent == null) {
             FilesListResponse response = mTracksProvider.getAllTracks();
-            send(FilesListResponse.PATH, response);
+            if (response != null) send(FilesListResponse.PATH, response);
+            return;
+        }
+        if ("queue".equals(parent.id)) { // have mercy
+            FilesListResponse queue = mTracksProvider.getQueue();
+            if (queue != null) send(FilesListResponse.PATH, queue);
             return;
         }
         FilesListResponse response = null;
@@ -501,9 +507,14 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         Parent parent = request.parent;
         Uri.Builder builder = PowerampAPI.ROOT_URI.buildUpon();
         if (parent != null) {
-            builder.appendEncodedPath(parent.type.value).appendEncodedPath(parent.id);
+            builder.appendEncodedPath(parent.type.value);
+            if (!"queue".equals(parent.id)) builder.appendEncodedPath(parent.id);
         }
-        builder.appendEncodedPath("files").appendEncodedPath(request.trackId);
+        if (parent == null || parent.type != Parent.Type.Queue) {
+            builder.appendEncodedPath("files");
+        }
+        builder.appendEncodedPath(request.contextualId != null ? request.contextualId
+                : request.trackId);
         callPowerAmpAction(PowerampAPI.Commands.OPEN_TO_PLAY, builder.build());
     }
 
@@ -522,6 +533,11 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
         switch (category) {
             case PowerampAPI.Cats.ROOT:
                 response = mTracksProvider.getAllTracks(bundle.getString(PowerampAPI.Track.TITLE));
+                break;
+
+            case PowerampAPI.Cats.QUEUE:
+                response = mTracksProvider.getQueueParent(
+                        bundle.getString(PowerampAPI.Track.TITLE));
                 break;
 
             case PowerampAPI.Cats.ALBUMS:

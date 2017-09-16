@@ -8,7 +8,8 @@ public class Parent implements Parcelable {
     public enum Type {
         Folder("folders"),
         Album("albums"),
-        Artist("artists");
+        Artist("artists"),
+        Queue("queue");
 
         @NonNull
         public final String value;

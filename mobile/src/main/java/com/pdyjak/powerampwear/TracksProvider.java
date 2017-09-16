@@ -24,17 +24,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 class TracksProvider {
+    private static final long CACHE_VALIDITY = TimeUnit.MINUTES.toMillis(30);
+
     @NonNull
     private final ContentResolver mContentResolver;
     @NonNull
     private final Map<String, String> mArtistCache = new HashMap<>();
     @NonNull
     private final Map<String, String> mAlbumCache = new HashMap<>();
+    @NonNull
+    private final Map<String, File> mIntermixedFilesCache = new HashMap<>();
+    private long mCacheUpdateTime;
 
     TracksProvider(@NonNull ContentResolver contentResolver) {
         mContentResolver = contentResolver;
+    }
+
+    @Nullable
+    FindParentResponse getQueueParent(@Nullable String title) {
+        return new FindParentResponse(new Parent("queue", Parent.Type.Queue), title);
     }
 
     @Nullable
@@ -134,6 +145,51 @@ class TracksProvider {
     }
 
     @Nullable
+    private List<File> getQueueInternal() {
+        Uri uri = PowerampAPI.ROOT_URI.buildUpon()
+                .appendEncodedPath("queue")
+                .build();
+        Cursor c = mContentResolver.query(uri, new String[] {
+                TableDefs.Queue._ID,
+                TableDefs.Queue.FOLDER_FILE_ID
+        }, null, null, null);
+        if (c == null) return null;
+        List<File> files = new ArrayList<>();
+        Map<String, File> all = getFilesFoldersIntermixed();
+        for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
+            String contextualId = c.getString(0);
+            String folderFileId = c.getString(1);
+            if (TextUtils.isEmpty(folderFileId)) continue;
+            File found = all.get(folderFileId);
+            if (found != null) {
+                found.contextualId = contextualId;
+                files.add(found);
+            }
+        }
+        c.close();
+        return files;
+    }
+
+    @NonNull
+    private Map<String, File> getFilesFoldersIntermixed() {
+        if (mCacheUpdateTime + CACHE_VALIDITY > System.currentTimeMillis()) {
+            return mIntermixedFilesCache;
+        }
+        Uri uri = PowerampAPI.ROOT_URI.buildUpon()
+                .appendEncodedPath("folders")
+                .appendEncodedPath("files")
+                .build();
+        List<File> files = extractFiles(uri);
+        if (files == null) return mIntermixedFilesCache;
+        mIntermixedFilesCache.clear();
+        for (File file : files) {
+            mIntermixedFilesCache.put(file.id, file);
+        }
+        mCacheUpdateTime = System.currentTimeMillis();
+        return mIntermixedFilesCache;
+    }
+
+    @Nullable
     ArtistsResponse getArtists() {
         Uri uri = PowerampAPI.ROOT_URI.buildUpon()
                 .appendEncodedPath("artists")
@@ -152,6 +208,13 @@ class TracksProvider {
         }
         c.close();
         return new ArtistsResponse(artists);
+    }
+
+    @Nullable
+    FilesListResponse getQueue() {
+        List<File> queue = getQueueInternal();
+        if (queue == null) return null;
+        return new FilesListResponse(new Parent("queue", Parent.Type.Queue), queue);
     }
 
     @Nullable

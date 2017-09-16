@@ -447,6 +447,7 @@ class PlayerViewModel implements MessageListener {
         }
 
         switch (parent.type) {
+            case Queue:
             case Folder:
                 FolderItem folderItem = new FolderItem(mMusicLibraryNavigator, parent.id, null,
                         null);

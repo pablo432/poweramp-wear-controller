@@ -1,8 +1,11 @@
 package com.pdyjak.powerampwearcommon.responses;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class File {
+    @Nullable
+    public String contextualId; // For queues, maybe playlists, too?
     @NonNull
     public final String id;
     @NonNull

@@ -13,10 +13,14 @@ public class PlaySongRequest implements Message {
     @NonNull
     public final String trackId;
     @Nullable
+    public final String contextualId;
+    @Nullable
     public final Parent parent;
 
-    public PlaySongRequest(@NonNull String trackId, @Nullable Parent parent) {
+    public PlaySongRequest(@NonNull String trackId, @Nullable String contextualId,
+                           @Nullable Parent parent) {
         this.trackId = trackId;
+        this.contextualId = contextualId;
         this.parent = parent;
     }
 
