@@ -22,6 +22,7 @@ public class FilesListResponse implements Message {
         mFilesList = files;
     }
 
+    @NonNull
     public List<File> getFilesList() {
         return Collections.unmodifiableList(mFilesList);
     }
