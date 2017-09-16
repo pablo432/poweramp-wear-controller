@@ -35,20 +35,22 @@
         android:layout_height="match_parent"
         app:layout_box="all">
 
-        <com.pdyjak.powerampwear.custom_views.CircularProgressbar
-            android:id="@+id/seekbar"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_centerInParent="true" />
-
         <ImageView
             android:id="@+id/play_pause_button"
             android:layout_width="@dimen/player_view_icon_size"
             android:layout_height="@dimen/player_view_icon_size"
+            android:padding="@dimen/player_view_icons_padding"
             android:layout_centerInParent="true"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_play_arrow_black_48dp"
-            android:tint="@color/white"/>
+            android:background="@drawable/play_button_bg"
+            android:tint="@color/black"/>
+
+        <com.pdyjak.powerampwear.custom_views.CircularProgressbar
+            android:id="@+id/seekbar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true" />
 
         <ImageView
             android:id="@+id/prev_song_button"
@@ -58,6 +60,7 @@
             android:layout_alignTop="@id/play_pause_button"
             android:padding="@dimen/player_view_icons_padding"
             android:src="@drawable/ic_fast_rewind_black_48dp"
+            android:background="@drawable/button_bg"
             android:tint="@color/white"/>
 
         <ImageView
@@ -68,6 +71,7 @@
             android:layout_alignTop="@id/play_pause_button"
             android:padding="@dimen/player_view_icons_padding"
             android:src="@drawable/ic_fast_forward_black_48dp"
+            android:background="@drawable/button_bg"
             android:tint="@color/white"/>
 
         <TextView
@@ -75,7 +79,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/play_pause_button"
-            android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
@@ -97,6 +100,16 @@
             android:textSize="13sp"
             tools:text="Seafret - Tell Me It's Real"/>
 
+        <TextClock
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/artist_album"
+            android:layout_marginTop="2dp"
+            android:textSize="13sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,6 +125,7 @@
                 android:padding="@dimen/player_view_icons_padding"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_volume_down_white"
+                android:background="@drawable/button_bg"
                 android:tint="@color/white"/>
 
             <ImageView
@@ -122,19 +136,11 @@
                 android:padding="@dimen/player_view_icons_padding"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_volume_up_white"
+                android:background="@drawable/button_bg"
                 android:tint="@color/white"/>
 
         </LinearLayout>
 
     </RelativeLayout>
-    
-    <TextClock
-        android:id="@+id/clock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:textSize="13sp"
-        android:textColor="@color/white"
-        android:layout_marginBottom="16dp"/>
 
 </android.support.wearable.view.BoxInsetLayout>

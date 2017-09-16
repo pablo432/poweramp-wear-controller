@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final CheckBox wakelockCheckbox = (CheckBox) findViewById(R.id.wakelock_checkbox);
-        wakelockCheckbox.setChecked(((App) getApplication()).shouldShowAlbumArt());
+        wakelockCheckbox.setChecked(((App) getApplication()).shouldWakeWhenChangingSongs());
         wakelockCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
