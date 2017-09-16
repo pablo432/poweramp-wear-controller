@@ -107,7 +107,6 @@
                 android:textSize="13sp"
                 tools:text="Seafret - Tell Me It's Real" />
 
-
         </LinearLayout>
 
         <TextClock
@@ -150,6 +149,23 @@
                 android:tint="@color/white" />
 
         </LinearLayout>
+
+        <com.pdyjak.powerampwear.custom_views.Tooltip
+            android:id="@+id/quick_nav_tooltip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/track_info"
+            android:layout_marginBottom="-12dp"
+            android:clickable="true"
+            android:paddingBottom="14dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="5dp"
+            android:text="Check out quick navigation - just tap on artist or track title."
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

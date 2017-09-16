@@ -340,7 +340,6 @@ class PlayerViewModel implements MessageListener {
         }
     }
 
-
     private void processTrackPositionSyncInfo(
             @NonNull TrackPositionSyncEvent trackPositionSyncEvent) {
         mCurrentTrackPosition = trackPositionSyncEvent.position;

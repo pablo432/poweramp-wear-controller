@@ -10,6 +10,7 @@ public class SettingsManager {
     private static final String CIRCULAR_SCROLLING_KEY = "use_circular_scrolling";
     private static final String SHOW_CLOCK_KEY = "show_clock";
     private static final String VOLUME_CONTROLS_ONBOARDING_KEY = "vc_onboarding";
+    private static final String QUICK_NAVIGATION_HINT_KEY = "quick_nav";
 
     public static class Listener {
         public void onCircularScrollingChanged() {}
@@ -23,6 +24,14 @@ public class SettingsManager {
 
     public SettingsManager(@NonNull SharedPreferences sharedPreferences) {
         mPrefs = sharedPreferences;
+    }
+
+    public boolean quickNavigationHintShown() {
+        return mPrefs.getBoolean(QUICK_NAVIGATION_HINT_KEY, false);
+    }
+
+    public void saveQuickNavigationHintShown() {
+        mPrefs.edit().putBoolean(QUICK_NAVIGATION_HINT_KEY, true).apply();
     }
 
     public boolean volumeControlsOnboardingShown() {

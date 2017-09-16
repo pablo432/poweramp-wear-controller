@@ -1,5 +1,8 @@
 package com.pdyjak.powerampwear.player;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -7,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextClock;
 import android.widget.TextView;
 
+import com.pdyjak.powerampwear.App;
 import com.pdyjak.powerampwear.R;
 import com.pdyjak.powerampwear.custom_views.CircularProgressbar;
+import com.pdyjak.powerampwear.settings.SettingsManager;
 
 class PlayerViewHolder extends RecyclerView.ViewHolder
         implements View.OnClickListener, PlayerViewModel.CommonEventsListener,
@@ -20,6 +25,7 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private static final int VOLUME_DOWN_TAG = 3;
     private static final int VOLUME_UP_TAG = 4;
     private static final int TRACK_INFO_TAG = 5;
+    private static final int QUICK_NAV_HINT_TAG = 6;
 
     @NonNull
     private final PlayerViewModel mViewModel;
@@ -41,6 +47,9 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
     private final TextClock mClock;
     @NonNull
     private final CircularProgressbar mProgressbar;
+    @NonNull
+    private final View mQuickNavHint;
+    private boolean mQuickNavHintVisible;
 
     PlayerViewHolder(@NonNull View view, @NonNull PlayerViewModel viewModel) {
         super(view);
@@ -79,12 +88,16 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
         volumeUpButton.setTag(VOLUME_UP_TAG);
         volumeUpButton.setOnClickListener(this);
 
+        mQuickNavHint = view.findViewById(R.id.quick_nav_tooltip);
+        mQuickNavHint.setTag(QUICK_NAV_HINT_TAG);
+        mQuickNavHint.setOnClickListener(this);
+
         mClock = (TextClock) view.findViewById(R.id.clock);
         mProgressbar = (CircularProgressbar) view.findViewById(R.id.seekbar);
 
         onStateChanged();
         onPauseChanged();
-        onTrackInfoChanged();
+        onTrackInfoChanged(true);
         onClockVisibilityChanged();
         onProgressbarVisibilityChanged();
     }
@@ -113,9 +126,23 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
                 break;
 
             case TRACK_INFO_TAG:
+                hideQuickNavigationHint();
                 mViewModel.goToLibrary();
                 break;
+
+            case QUICK_NAV_HINT_TAG:
+                hideQuickNavigationHint();
+                break;
         }
+    }
+
+    private void hideQuickNavigationHint() {
+        if (!mQuickNavHintVisible) return;
+        SettingsManager settingsManager = ((App) itemView.getContext().getApplicationContext())
+                .getSettingsManager();
+        settingsManager.saveQuickNavigationHintShown();
+        mQuickNavHintVisible = false;
+        mQuickNavHint.setVisibility(View.GONE);
     }
 
     @Override
@@ -150,8 +177,44 @@ class PlayerViewHolder extends RecyclerView.ViewHolder
 
     @Override
     public void onTrackInfoChanged() {
+        onTrackInfoChanged(false);
+    }
+
+    private void onTrackInfoChanged(boolean initial) {
         mTitleTextView.setText(mViewModel.getTitle());
         mArtistAlbumTextView.setText(mViewModel.getArtistAlbum());
+        if (!initial) {
+            showQuickNavigationHintIfNeeded();
+        }
+    }
+
+    private void showQuickNavigationHintIfNeeded() {
+        SettingsManager settingsManager = ((App) itemView.getContext().getApplicationContext())
+                .getSettingsManager();
+        if (settingsManager.quickNavigationHintShown()) return;
+        if (mQuickNavHintVisible) return;
+        mQuickNavHintVisible = true;
+        ValueAnimator animator = ValueAnimator.ofFloat(0.35f, 1f);
+        animator.setDuration(300);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mQuickNavHint.setScaleX(0.35f);
+                mQuickNavHint.setScaleY(0.35f);
+                mQuickNavHint.setAlpha(0.35f);
+                mQuickNavHint.setVisibility(View.VISIBLE);
+            }
+        });
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float progress = (float) animation.getAnimatedValue();
+                mQuickNavHint.setScaleX(progress);
+                mQuickNavHint.setScaleY(progress);
+                mQuickNavHint.setAlpha(progress);
+            }
+        });
+        animator.start();
     }
 
     @Override
