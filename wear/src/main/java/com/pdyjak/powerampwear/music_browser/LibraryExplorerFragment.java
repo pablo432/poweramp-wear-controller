@@ -110,6 +110,10 @@ public class LibraryExplorerFragment extends Fragment implements MusicLibraryNav
             case GetFilesRequest.PATH:
                 startFilesBrowser(null, false, scrollTo);
                 break;
+
+            case "queue":
+                startFilesBrowser(Parent.forQueue(), false, scrollTo);
+                break;
         }
     }
 

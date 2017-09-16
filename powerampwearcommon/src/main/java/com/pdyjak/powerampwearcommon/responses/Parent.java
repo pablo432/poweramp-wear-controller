@@ -23,6 +23,10 @@ public class Parent implements Parcelable {
     @NonNull
     public final Type type;
 
+    public static Parent forQueue() {
+        return new Parent("queue", Type.Queue);
+    }
+
     public Parent(@NonNull String id, @NonNull Type type) {
         this.id = id;
         this.type = type;

@@ -37,6 +37,11 @@ class MusicLibraryCacheImpl implements MusicLibraryCache {
 
     @Override
     public void update(@NonNull FilesListResponse response) {
+        if (response.parent != null
+                && (response.parent.type == Parent.Type.Queue
+                || "queue".equals(response.parent.id))) {
+            return;
+        }
         mFilesResponseMap.put(response.parent, response);
     }
 

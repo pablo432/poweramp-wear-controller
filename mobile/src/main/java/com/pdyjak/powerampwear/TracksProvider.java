@@ -45,7 +45,7 @@ class TracksProvider {
 
     @Nullable
     FindParentResponse getQueueParent(@Nullable String title) {
-        return new FindParentResponse(new Parent("queue", Parent.Type.Queue), title);
+        return new FindParentResponse(Parent.forQueue(), title);
     }
 
     @Nullable
@@ -214,7 +214,7 @@ class TracksProvider {
     FilesListResponse getQueue() {
         List<File> queue = getQueueInternal();
         if (queue == null) return null;
-        return new FilesListResponse(new Parent("queue", Parent.Type.Queue), queue);
+        return new FilesListResponse(Parent.forQueue(), queue);
     }
 
     @Nullable
