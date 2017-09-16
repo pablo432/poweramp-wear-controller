@@ -10,6 +10,7 @@ import com.google.firebase.FirebaseApp;
 public class App extends Application {
     private static final String ONBOARDING_COMPLETED_KEY = "onboarding_completed";
     private static final String SHOW_ALBUM_ART_KEY = "show_albumart";
+    private static final String WAKELOCK_ON_SONG_CHANGE = "albumart_wakelock";
 
     @Override
     public void onCreate() {
@@ -36,5 +37,13 @@ public class App extends Application {
 
     public void saveShouldShowAlbumArt(boolean value) {
         getPrefs().edit().putBoolean(SHOW_ALBUM_ART_KEY, value).apply();
+    }
+
+    public boolean shouldWakeWhenChangingSongs() {
+        return getPrefs().getBoolean(WAKELOCK_ON_SONG_CHANGE, shouldShowAlbumArt());
+    }
+
+    public void saveShouldWakeWhenChangingSongs(boolean value) {
+        getPrefs().edit().putBoolean(WAKELOCK_ON_SONG_CHANGE, value).apply();
     }
 }

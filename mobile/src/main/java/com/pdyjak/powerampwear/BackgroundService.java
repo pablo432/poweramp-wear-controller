@@ -70,6 +70,18 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 }
             });
         }
+
+        @Override
+        public void setWakeWhenChangingSongs(final boolean wake) throws RemoteException {
+            Handler handler = getHandler();
+            if (handler == null) return;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    setShouldWakeWhenChangingSongs(wake);
+                }
+            });
+        }
     };
 
     private Handler mHandler;
@@ -86,6 +98,7 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     private TracksProvider mTracksProvider;
     private boolean mReceiversRegistered;
     private boolean mShouldShowAlbumArt;
+    private boolean mShouldWakeWhenChangingSongs;
 
     @NonNull
     private final BroadcastReceiver mTrackReceiver = new BroadcastReceiver() {
@@ -146,7 +159,9 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     public void onCreate() {
         super.onCreate();
         if (BuildConfig.ENABLE_CRASH_REPORTING) FirebaseApp.initializeApp(this);
-        mShouldShowAlbumArt = ((App) this.getApplication()).shouldShowAlbumArt();
+        App app = (App) getApplication();
+        mShouldShowAlbumArt = app.shouldShowAlbumArt();
+        mShouldWakeWhenChangingSongs = app.shouldWakeWhenChangingSongs();
         mTracksProvider = new TracksProvider(getContentResolver());
         mGoogleApiClient = new GoogleApiClient.Builder(this, this, this)
                 .addApi(Wearable.API)
@@ -185,6 +200,12 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
     private void setShouldShowAlbumArt(boolean shouldShow) {
         if (mShouldShowAlbumArt == shouldShow) return;
         mShouldShowAlbumArt = shouldShow;
+        processAlbumArtIntent();
+    }
+
+    private void setShouldWakeWhenChangingSongs(boolean shouldWake) {
+        if (mShouldWakeWhenChangingSongs == shouldWake) return;
+        mShouldWakeWhenChangingSongs = shouldWake;
         processAlbumArtIntent();
     }
 
@@ -258,7 +279,10 @@ public class BackgroundService extends Service implements GoogleApiClient.Connec
                 && (!equals(mPreviousEvent.album, event.album)
                 || !equals(mPreviousEvent.artist, event.artist));
         mPreviousEvent = event;
-        if (mShouldShowAlbumArt && (requestedByWearable || artistAlbumChanged)) wakeScreen();
+        if (mShouldShowAlbumArt && mShouldWakeWhenChangingSongs
+                && (requestedByWearable || artistAlbumChanged)) {
+            wakeScreen();
+        }
         send(TrackChangedEvent.PATH, event);
     }
 

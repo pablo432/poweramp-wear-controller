@@ -62,8 +62,17 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"/>
 
+        <CheckBox
+            android:layout_marginLeft="16dp"
+            android:id="@+id/wakelock_checkbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Wake screen when changing songs"/>
+
         <TextView
-            android:id="@+id/albumart_text"
+            android:id="@+id/wakelock_text"
+            android:layout_marginLeft="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/display_album_art_hint"/>

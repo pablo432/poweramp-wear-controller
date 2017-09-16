@@ -25,17 +25,24 @@ public class MainActivity extends AppCompatActivity {
         private IBackgroundService mBinder;
         @Nullable
         private Boolean mShouldShowAlbumArt;
+        @Nullable
+        private Boolean mShouldWakeWhenChangingSongs;
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mBinder = IBackgroundService.Stub.asInterface(service);
-            if (mShouldShowAlbumArt != null) {
-                try {
+            if (mShouldShowAlbumArt == null && mShouldWakeWhenChangingSongs == null) return;
+            try {
+                if (mShouldShowAlbumArt != null) {
                     mBinder.setShowAlbumArt(mShouldShowAlbumArt);
                     mShouldShowAlbumArt = null;
-                } catch (RemoteException e) {
-                    if (BuildConfig.DEBUG) e.printStackTrace();
                 }
+                if (mShouldWakeWhenChangingSongs != null) {
+                    mBinder.setWakeWhenChangingSongs(mShouldWakeWhenChangingSongs);
+                    mShouldWakeWhenChangingSongs = null;
+                }
+            } catch (RemoteException e) {
+                if (BuildConfig.DEBUG) e.printStackTrace();
             }
         }
 
@@ -50,6 +57,18 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 try {
                     mBinder.setShowAlbumArt(shouldShow);
+                } catch (RemoteException e) {
+                    if (BuildConfig.DEBUG) e.printStackTrace();
+                }
+            }
+        }
+
+        void setShouldWakeWhenChangingSongs(boolean shouldWake) {
+            if (mBinder == null) {
+                mShouldWakeWhenChangingSongs = shouldWake;
+            } else {
+                try {
+                    mBinder.setWakeWhenChangingSongs(shouldWake);
                 } catch (RemoteException e) {
                     if (BuildConfig.DEBUG) e.printStackTrace();
                 }
@@ -75,12 +94,14 @@ public class MainActivity extends AppCompatActivity {
         }
         mServiceIntent = new Intent(this, BackgroundService.class);
         mPowerampInstalledTextView = (TextView) findViewById(R.id.poweramp_installed_textview);
+
         findViewById(R.id.restart_service).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 restartService();
             }
         });
+
         final CheckBox albumArtCheckbox = (CheckBox) findViewById(R.id.albumart_checkbox);
         albumArtCheckbox.setChecked(((App) getApplication()).shouldShowAlbumArt());
         albumArtCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -90,10 +111,21 @@ public class MainActivity extends AppCompatActivity {
                 mServiceConnection.setShouldShowAlbumArt(isChecked);
             }
         });
-        findViewById(R.id.albumart_text).setOnClickListener(new View.OnClickListener() {
+
+        final CheckBox wakelockCheckbox = (CheckBox) findViewById(R.id.wakelock_checkbox);
+        wakelockCheckbox.setChecked(((App) getApplication()).shouldShowAlbumArt());
+        wakelockCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ((App) getApplication()).saveShouldWakeWhenChangingSongs(isChecked);
+                mServiceConnection.setShouldWakeWhenChangingSongs(isChecked);
+            }
+        });
+
+        findViewById(R.id.wakelock_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                albumArtCheckbox.setChecked(!albumArtCheckbox.isChecked());
+                wakelockCheckbox.setChecked(!wakelockCheckbox.isChecked());
             }
         });
     }
