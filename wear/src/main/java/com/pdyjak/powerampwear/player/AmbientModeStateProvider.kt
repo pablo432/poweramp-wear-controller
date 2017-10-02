@@ -1,12 +1,8 @@
 package com.pdyjak.powerampwear.player
 
+import com.pdyjak.powerampwear.common.SimpleEvent
+
 interface AmbientModeStateProvider {
-
-    interface Listener {
-        fun onAmbientModeStateChanged()
-    }
-
     val isInAmbientMode: Boolean
-    fun addAmbientModeListener(listener: Listener)
-    fun removeAmbientModeListener(listener: Listener)
+    val onAmbientModeChanged: SimpleEvent
 }

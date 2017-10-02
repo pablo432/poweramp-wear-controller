@@ -45,7 +45,7 @@ internal class MusicLibraryCacheImpl : MusicLibraryCache {
         foldersList = null
         mAlbumsResponsesMap.clear()
         artists = null
-        onInvalidation.notifyEventChanged()
+        onInvalidation()
     }
 
     override fun getFilesList(parent: Parent?): FilesListResponse? {

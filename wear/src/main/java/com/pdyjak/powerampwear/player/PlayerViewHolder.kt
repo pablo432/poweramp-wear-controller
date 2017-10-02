@@ -10,80 +10,27 @@ import android.widget.TextClock
 import android.widget.TextView
 
 import com.pdyjak.powerampwear.R
+import com.pdyjak.powerampwear.common.byId
 import com.pdyjak.powerampwear.common.settingsManager
 import com.pdyjak.powerampwear.custom_views.CircularProgressbar
 
 internal class PlayerViewHolder(view: View, private val mViewModel: PlayerViewModel)
-    : RecyclerView.ViewHolder(view), PlayerViewModel.CommonEventsListener,
-        PlayerViewModel.UiElementsVisibilityListener, PlayerViewModel.TrackPositionListener {
+    : RecyclerView.ViewHolder(view) {
 
-    private val mProgressSpinner: View
-    private val mErrorContainer: View
-    private val mPlayerViewRoot: View
-    private val mTrackInfoView: View
-    private val mTitleTextView: TextView
-    private val mArtistAlbumTextView: TextView
-    private val mPlayPauseButton: ImageView
-    private val mClock: TextClock
-    private val mProgressbar: CircularProgressbar
-    private val mQuickNavHint: View
-    private var mQuickNavHintVisible: Boolean = false
-
-    init {
-        mViewModel.addListenerWeakly(this as PlayerViewModel.CommonEventsListener)
-        mViewModel.addListenerWeakly(this as PlayerViewModel.UiElementsVisibilityListener)
-        mViewModel.setTrackPositionListenerWeakly(this)
-        mProgressSpinner = view.findViewById(R.id.progress_spinner)
-        mErrorContainer = view.findViewById(R.id.error_container)
-        mPlayerViewRoot = view.findViewById(R.id.player_root)
-
-        mTrackInfoView = view.findViewById(R.id.track_info)
-        mTrackInfoView.setOnClickListener {
-            hideQuickNavigationHint()
-            mViewModel.goToLibrary()
-        }
-
-        mTitleTextView = view.findViewById(R.id.title) as TextView
-        mArtistAlbumTextView = view.findViewById(R.id.artist_album) as TextView
-
-        mPlayPauseButton = view.findViewById(R.id.play_pause_button) as ImageView
-        mPlayPauseButton.setOnClickListener { mViewModel.togglePlayPause() }
-
-        val prevSong = view.findViewById(R.id.prev_song_button)
-        prevSong.setOnClickListener { mViewModel.previousTrack() }
-
-        val nextSong = view.findViewById(R.id.next_song_button)
-        nextSong.setOnClickListener { mViewModel.nextTrack() }
-
-        val volumeDownButton = view.findViewById(R.id.volume_down_button)
-        volumeDownButton.setOnClickListener { mViewModel.volumeDown() }
-
-        val volumeUpButton = view.findViewById(R.id.volume_up_button)
-        volumeUpButton.setOnClickListener { mViewModel.volumeUp() }
-
-        mQuickNavHint = view.findViewById(R.id.quick_nav_tooltip)
-        mQuickNavHint.setOnClickListener { hideQuickNavigationHint() }
-
-        mClock = view.findViewById(R.id.clock) as TextClock
-        mProgressbar = view.findViewById(R.id.seekbar) as CircularProgressbar
-
-        onStateChanged()
-        onPauseChanged()
-        onTrackInfoChanged(true)
-        onClockVisibilityChanged()
-        onProgressbarVisibilityChanged()
+    private companion object {
+        fun Boolean.toVisibility() = if (this) View.VISIBLE else View.GONE
     }
 
-    private fun hideQuickNavigationHint() {
-        if (!mQuickNavHintVisible) return
-        val settingsManager = itemView.context.settingsManager
-        settingsManager.saveQuickNavigationHintShown()
-        mQuickNavHintVisible = false
-        mQuickNavHint.visibility = View.GONE
+    private val mClockVisibilityHandler = {
+        mClock.visibility = mViewModel.shouldShowClock.toVisibility()
     }
 
-    override fun onStateChanged() {
-        when (mViewModel.currentState) {
+    private val mProgressbarVisibilityHandler = {
+        mProgressbar.visibility = mViewModel.shouldShowProgressbar.toVisibility()
+    }
+
+    private val mStateChangedHandler = {
+        when (mViewModel.state) {
             PlayerViewModel.State.Loading -> {
                 mProgressSpinner.visibility = View.VISIBLE
                 mErrorContainer.visibility = View.GONE
@@ -104,15 +51,87 @@ internal class PlayerViewHolder(view: View, private val mViewModel: PlayerViewMo
         }
     }
 
-    override fun onPauseChanged() {
-        mPlayPauseButton.setImageResource(if (mViewModel.isPaused)
+    private val mPlayPauseChangedEventHandler = {
+        mPlayPauseButton.setImageResource(if (mViewModel.paused)
             R.drawable.ic_play_arrow_black_48dp
         else
             R.drawable.ic_pause_black_48dp)
     }
 
-    override fun onTrackInfoChanged() {
-        onTrackInfoChanged(false)
+    private val mTrackChangedInfoEventHandler = { onTrackInfoChanged(false) }
+
+    private val mPositionChangedHandler = { (position, duration): PositionChangedEventArgs ->
+        if (duration != 0) {
+            mProgressbar.setProgress(Math.min(1.0f, position.toFloat() / duration))
+        }
+    }
+
+    private val mProgressSpinner: View
+    private val mErrorContainer: View
+    private val mPlayerViewRoot: View
+    private val mTrackInfoView: View
+    private val mTitleTextView: TextView
+    private val mArtistAlbumTextView: TextView
+    private val mPlayPauseButton: ImageView
+    private val mClock: TextClock
+    private val mProgressbar: CircularProgressbar
+    private val mQuickNavHint: View
+    private var mQuickNavHintVisible: Boolean = false
+
+    init {
+        mViewModel.onClockVisibilityChanged.weakly() += mClockVisibilityHandler
+        mViewModel.onProgressbarVisibilityChanged.weakly() += mProgressbarVisibilityHandler
+        mViewModel.onStateChanged.weakly() += mStateChangedHandler
+        mViewModel.onPauseChanged.weakly() += mPlayPauseChangedEventHandler
+        mViewModel.onTrackInfoChanged.weakly() += mTrackChangedInfoEventHandler
+        mViewModel.onPositionChanged.weakly() += mPositionChangedHandler
+        mProgressSpinner = view byId  R.id.progress_spinner
+        mErrorContainer = view byId R.id.error_container
+        mPlayerViewRoot = view byId R.id.player_root
+
+        mTrackInfoView = view byId R.id.track_info
+        mTrackInfoView.setOnClickListener {
+            hideQuickNavigationHint()
+            mViewModel.goToLibrary()
+        }
+
+        mTitleTextView = view byId R.id.title
+        mArtistAlbumTextView = view byId R.id.artist_album
+
+        mPlayPauseButton = view byId R.id.play_pause_button
+        mPlayPauseButton.setOnClickListener { mViewModel.togglePlayPause() }
+
+        val prevSong = view.findViewById(R.id.prev_song_button)
+        prevSong.setOnClickListener { mViewModel.previousTrack() }
+
+        val nextSong = view.findViewById(R.id.next_song_button)
+        nextSong.setOnClickListener { mViewModel.nextTrack() }
+
+        val volumeDownButton = view.findViewById(R.id.volume_down_button)
+        volumeDownButton.setOnClickListener { mViewModel.volumeDown() }
+
+        val volumeUpButton = view.findViewById(R.id.volume_up_button)
+        volumeUpButton.setOnClickListener { mViewModel.volumeUp() }
+
+        mQuickNavHint = view byId R.id.quick_nav_tooltip
+        mQuickNavHint.setOnClickListener { hideQuickNavigationHint() }
+
+        mClock = view byId R.id.clock
+        mProgressbar = view byId R.id.seekbar
+
+        mStateChangedHandler()
+        mPlayPauseChangedEventHandler()
+        onTrackInfoChanged(true)
+        mClockVisibilityHandler()
+        mProgressbarVisibilityHandler()
+    }
+
+    private fun hideQuickNavigationHint() {
+        if (!mQuickNavHintVisible) return
+        val settingsManager = itemView.context.settingsManager
+        settingsManager.saveQuickNavigationHintShown()
+        mQuickNavHintVisible = false
+        mQuickNavHint.visibility = View.GONE
     }
 
     private fun onTrackInfoChanged(initial: Boolean) {
@@ -145,17 +164,4 @@ internal class PlayerViewHolder(view: View, private val mViewModel: PlayerViewMo
         animator.start()
     }
 
-    override fun onClockVisibilityChanged() {
-        mClock.visibility = if (mViewModel.shouldShowClock()) View.VISIBLE else View.GONE
-    }
-
-    override fun onProgressbarVisibilityChanged() {
-        mProgressbar.visibility = if (mViewModel.shouldShowProgressbar())
-            View.VISIBLE else View.GONE
-    }
-
-    override fun onPositionChanged(position: Int, duration: Int) {
-        if (duration == 0) return
-        mProgressbar.setProgress(Math.min(1.0f, position.toFloat() / duration))
-    }
 }

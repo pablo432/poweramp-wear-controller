@@ -17,7 +17,6 @@ import com.pdyjak.powerampwear.common.byId
 import com.pdyjak.powerampwear.common.musicLibraryCache
 import com.pdyjak.powerampwear.common.nullIfEmpty
 import com.pdyjak.powerampwear.common.settingsManager
-import com.pdyjak.powerampwear.settings.SettingsManager
 
 abstract class BrowserFragmentBase : Fragment() {
 
@@ -25,10 +24,8 @@ abstract class BrowserFragmentBase : Fragment() {
         const val SCROLL_DESTINATION_KEY = "scroll_to"
     }
 
-    private inner class SettingsListener : SettingsManager.Listener() {
-        override fun onCircularScrollingChanged() {
-            mViews?.updateCircullarScrolling()
-        }
+    private val mCircularScrollingChangedHandler: () -> Unit = {
+        mViews?.updateCircullarScrolling()
     }
 
     private val mCacheInvalidationListener = {
@@ -124,7 +121,6 @@ abstract class BrowserFragmentBase : Fragment() {
     }
 
     private val mScrollStateHelper = ScrollStateHelper()
-    private val mSettingsListener = SettingsListener()
     private var mViews: Views? = null
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -146,7 +142,7 @@ abstract class BrowserFragmentBase : Fragment() {
     override fun onResume() {
         super.onResume()
         val settingsManager = activity.settingsManager
-        settingsManager.addSettingsListener(mSettingsListener)
+        settingsManager.onCircularScrollingChanged += mCircularScrollingChangedHandler
         activity.musicLibraryCache.onInvalidation += mCacheInvalidationListener
         mViews!!.resume()
     }
@@ -159,7 +155,7 @@ abstract class BrowserFragmentBase : Fragment() {
     @CallSuper
     override fun onPause() {
         super.onPause()
-        activity.settingsManager.removeListener(mSettingsListener)
+        activity.settingsManager.onCircularScrollingChanged -= mCircularScrollingChangedHandler
         activity.musicLibraryCache.onInvalidation -= mCacheInvalidationListener
         mViews!!.pause()
     }

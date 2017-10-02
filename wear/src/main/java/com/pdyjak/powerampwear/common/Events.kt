@@ -3,8 +3,6 @@ package com.pdyjak.powerampwear.common
 import java.util.*
 import kotlin.collections.HashSet
 
-abstract class EventArgs
-
 // TODO: remove duplication
 
 class SimpleEvent {
@@ -27,10 +25,10 @@ class SimpleEvent {
         mEventHandlers.remove(eventHandler)
     }
 
-    fun notifyEventChanged() {
+    operator fun invoke() {
         val copy = HashSet(mEventHandlers)
         for (handler in copy) handler.invoke()
-        if (mWeakEvent != null) mWeakEvent!!.notifyEventChanged()
+        if (mWeakEvent != null) mWeakEvent!!.invoke()
     }
 
     fun weakly(): SimpleEvent {
@@ -42,7 +40,7 @@ class SimpleEvent {
     }
 }
 
-class Event<ArgsType : EventArgs?> {
+class Event<ArgsType> {
     private val mEventHandlers: MutableSet<(ArgsType) -> Unit>
     private val mWeak: Boolean
     private var mWeakEvent: Event<ArgsType>? = null
@@ -62,10 +60,10 @@ class Event<ArgsType : EventArgs?> {
         mEventHandlers.remove(eventHandler)
     }
 
-    fun notifyEventChanged(args: ArgsType) {
+    operator fun invoke(args: ArgsType) {
         val copy = HashSet(mEventHandlers)
         for (handler in copy) handler.invoke(args)
-        if (mWeakEvent != null) mWeakEvent!!.notifyEventChanged(args)
+        if (mWeakEvent != null) mWeakEvent!!.invoke(args)
     }
 
     fun weakly(): Event<ArgsType> {

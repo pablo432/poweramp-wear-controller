@@ -21,22 +21,22 @@ class MusicLibraryNavigatorImpl : MusicLibraryNavigator {
     override val onFileSelected: Event<FileSelectedEventArgs> = Event()
 
     override fun selectCategory(item: CategoryItem, fromPlayer: Boolean, scrollTo: String?) {
-        onCategorySelected.notifyEventChanged(CategorySelectedEventArgs(item, fromPlayer, scrollTo))
+        onCategorySelected(CategorySelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectFolder(item: FolderItem, fromPlayer: Boolean, scrollTo: String?) {
-        onFolderSelected.notifyEventChanged(FolderSelectedEventArgs(item, fromPlayer, scrollTo))
+        onFolderSelected(FolderSelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectAlbum(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?) {
-        onAlbumSelected.notifyEventChanged(AlbumSelectedEventArgs(item, fromPlayer, scrollTo))
+        onAlbumSelected(AlbumSelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectFile(item: FileItem, fromPlayer: Boolean) {
-        onFileSelected.notifyEventChanged(FileSelectedEventArgs(item, fromPlayer))
+        onFileSelected(FileSelectedEventArgs(item, fromPlayer))
     }
 
     override fun selectArtist(item: ArtistItem, fromPlayer: Boolean) {
-        onArtistSelected.notifyEventChanged(ArtistSelectedEventArgs(item, fromPlayer))
+        onArtistSelected(ArtistSelectedEventArgs(item, fromPlayer))
     }
 }

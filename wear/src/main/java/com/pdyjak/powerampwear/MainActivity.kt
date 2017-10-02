@@ -31,8 +31,8 @@ class MainActivity : WearableActivity(), MessageListener {
         mShouldNavigateToPlayerView = true
     }
 
-    private val mItemSelectedEventHandler = { args: ItemSelectedEventArgs<Clickable>? ->
-        if (args!!.fromPlayer) mViewPager!!.setCurrentItem(1, true)
+    private val mItemSelectedEventHandler = { args: ItemSelectedEventArgs<Clickable> ->
+        if (args.fromPlayer) mViewPager!!.setCurrentItem(1, true)
     }
 
     private inner class PageChangeListener : ViewPager.OnPageChangeListener {
@@ -72,13 +72,15 @@ class MainActivity : WearableActivity(), MessageListener {
         super.onCreate(savedInstanceState)
         setAmbientEnabled()
         setContentView(R.layout.activity_main)
-        mViewPager = findViewById(R.id.view_pager) as ViewPager
-        mViewPager!!.adapter = MainViewPagerAdapter(fragmentManager)
-        mViewPager!!.addOnPageChangeListener(PageChangeListener())
-        mViewPager!!.offscreenPageLimit = OFFSCREEN_PAGE_LIMIT
+        mViewPager = (findViewById(R.id.view_pager) as ViewPager).apply {
+            adapter = MainViewPagerAdapter(fragmentManager)
+            addOnPageChangeListener(PageChangeListener())
+            offscreenPageLimit = OFFSCREEN_PAGE_LIMIT
+        }
         mAlbumArt = findViewById(R.id.album_art) as ImageView
-        mDotsIndicator = findViewById(R.id.dots_indicator) as CircleIndicator
-        mDotsIndicator!!.setViewPager(mViewPager)
+        mDotsIndicator = (findViewById(R.id.dots_indicator) as CircleIndicator).apply {
+            setViewPager(mViewPager)
+        }
     }
 
     override fun onEnterAmbient(ambientDetails: Bundle?) {
@@ -133,7 +135,6 @@ class MainActivity : WearableActivity(), MessageListener {
     private fun updateDisplay() {
         mAlbumArt!!.setImageBitmap(if (isAmbient) null else mAlbumArtBitmap)
     }
-
 }
 
 internal val Context.ambientModeStateProviderInternal: AmbientModeStateProviderImpl
