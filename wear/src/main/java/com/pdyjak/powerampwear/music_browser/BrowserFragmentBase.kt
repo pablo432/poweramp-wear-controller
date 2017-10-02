@@ -9,11 +9,11 @@ import android.support.v7.widget.LinearSnapHelper
 import android.support.wearable.view.CurvedChildLayoutManager
 import android.support.wearable.view.ProgressSpinner
 import android.support.wearable.view.WearableRecyclerView
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pdyjak.powerampwear.R
+import com.pdyjak.powerampwear.common.EventArgs
 import com.pdyjak.powerampwear.common.musicLibraryCache
 import com.pdyjak.powerampwear.common.nullIfEmpty
 import com.pdyjak.powerampwear.common.settingsManager
@@ -32,12 +32,10 @@ abstract class BrowserFragmentBase : Fragment() {
         }
     }
 
-    private inner class CacheInvalidationListener : MusicLibraryCache.InvalidationListener {
-        override fun onCacheInvalidated() {
-            mSpinner!!.visibility = View.VISIBLE
-            mContentView!!.visibility = View.GONE
-            fetchItems()
-        }
+    private val mCacheInvalidationListener = { _: EventArgs? ->
+        mSpinner!!.visibility = View.VISIBLE
+        mContentView!!.visibility = View.GONE
+        fetchItems()
     }
 
     protected abstract fun createViewHolderFactory(): ViewHolderFactory
@@ -60,7 +58,6 @@ abstract class BrowserFragmentBase : Fragment() {
 
     private val mScrollStateHelper = ScrollStateHelper()
     private val mSettingsListener = SettingsListener()
-    private val mCacheInvalidationListener = CacheInvalidationListener()
 
     private var mAdapter: BrowserRVAdapter<Clickable>? = null
     private var mContentView: WearableRecyclerView? = null
@@ -97,7 +94,7 @@ abstract class BrowserFragmentBase : Fragment() {
         mContentView!!.isCircularScrollingGestureEnabled =
                 settingsManager.useCircularScrollingGesture()
         settingsManager.addSettingsListener(mSettingsListener)
-        activity.musicLibraryCache.addInvalidationListener(mCacheInvalidationListener)
+        activity.musicLibraryCache.onInvalidation += mCacheInvalidationListener
         refresh(true)
     }
 
@@ -123,7 +120,7 @@ abstract class BrowserFragmentBase : Fragment() {
     override fun onPause() {
         super.onPause()
         activity.settingsManager.removeListener(mSettingsListener)
-        activity.musicLibraryCache.removeInvalidationListener(mCacheInvalidationListener)
+        activity.musicLibraryCache.onInvalidation -= mCacheInvalidationListener
         mScrollStateHelper.save(mContentView)
     }
 

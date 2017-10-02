@@ -1,5 +1,7 @@
 package com.pdyjak.powerampwear
 
+import com.pdyjak.powerampwear.common.Event
+import com.pdyjak.powerampwear.common.EventArgs
 import com.pdyjak.powerampwear.music_browser.MusicLibraryCache
 import com.pdyjak.powerampwearcommon.responses.AlbumsResponse
 import com.pdyjak.powerampwearcommon.responses.ArtistsResponse
@@ -8,15 +10,15 @@ import com.pdyjak.powerampwearcommon.responses.FoldersListResponse
 import com.pdyjak.powerampwearcommon.responses.Parent
 
 import java.util.HashMap
-import java.util.HashSet
 
 /**
  * TODO: keep this in some persistent storage
  */
 internal class MusicLibraryCacheImpl : MusicLibraryCache {
-    private val mInvalidationListeners = HashSet<MusicLibraryCache.InvalidationListener>()
     private val mFilesResponseMap = HashMap<Parent?, FilesListResponse>()
     private val mAlbumsResponsesMap = HashMap<Parent, AlbumsResponse>()
+
+    private val mInvalidationEvent = Event<EventArgs>()
 
     override var foldersList: FoldersListResponse? = null
         private set
@@ -46,8 +48,7 @@ internal class MusicLibraryCacheImpl : MusicLibraryCache {
         foldersList = null
         mAlbumsResponsesMap.clear()
         artists = null
-        val copy = HashSet(mInvalidationListeners)
-        for (listener in copy) listener.onCacheInvalidated()
+        mInvalidationEvent.notifyEventChanged()
     }
 
     override fun getFilesList(parent: Parent?): FilesListResponse? {
@@ -58,11 +59,6 @@ internal class MusicLibraryCacheImpl : MusicLibraryCache {
         return mAlbumsResponsesMap[parent]
     }
 
-    override fun addInvalidationListener(listener: MusicLibraryCache.InvalidationListener) {
-        mInvalidationListeners.add(listener)
-    }
-
-    override fun removeInvalidationListener(listener: MusicLibraryCache.InvalidationListener) {
-        mInvalidationListeners.remove(listener)
-    }
+    override val onInvalidation: Event<EventArgs>
+        get() = mInvalidationEvent
 }
