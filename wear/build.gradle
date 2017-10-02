@@ -8,8 +8,8 @@ android {
         applicationId "com.pdyjak.powerampwear"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 200
-        versionName "2.00"
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
         archivesBaseName = "poweramp_wear_controller-wear-$versionName"
     }
     buildTypes {

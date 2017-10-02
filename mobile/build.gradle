@@ -10,8 +10,8 @@ android {
         applicationId "com.pdyjak.powerampwear"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 200
-        versionName "2.00"
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         archivesBaseName = "poweramp_wear_controller-mobile-$versionName"
     }
