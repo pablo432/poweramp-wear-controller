@@ -90,46 +90,46 @@ class BackgroundService : Service(), GoogleApiClient.ConnectionCallbacks,
     private var mShouldWakeWhenChangingSongs: Boolean = false
 
     private val mTrackReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent?) {
             mTrackIntent = intent
             processTrackIntent(false, intent)
         }
     }
 
     private val mStatusReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent?) {
             mStatusIntent = intent
             processStatusIntent(intent)
         }
     }
 
     private val mAlbumArtReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent?) {
             mAlbumArtIntent = intent
             processAlbumArtIntent(intent)
         }
     }
 
     private val mPlayingModeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent?) {
             mPlayingModeIntent = intent
             processPlayingModeIntent(intent)
         }
     }
 
     private val mTrackPosSyncReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
+        override fun onReceive(context: Context, intent: Intent?) {
             mTrackPosIntent = intent
             processTrackPositionIntent(intent)
         }
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    override fun onBind(intent: Intent?): IBinder? {
         return mBinder
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        return Service.START_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
     }
 
     override fun onCreate() {
@@ -145,7 +145,7 @@ class BackgroundService : Service(), GoogleApiClient.ConnectionCallbacks,
         mGoogleApiClient.connect()
     }
 
-    override fun onConnected(connectionHind: Bundle?) {
+    override fun onConnected(connectionHint: Bundle?) {
         mConnectionState = ConnectionState.Connected
         mNodesResolver = NodesResolver(mGoogleApiClient,
                 PROCESS_POWERAMP_EVENTS_CAPABILITY_NAME)
