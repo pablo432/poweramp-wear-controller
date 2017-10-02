@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pdyjak.powerampwear.R
+import com.pdyjak.powerampwear.common.byId
 import com.pdyjak.powerampwear.common.messageExchangeHelper
 import com.pdyjak.powerampwear.common.musicLibraryNavigator
 import com.pdyjak.powerampwear.music_browser.albums.AlbumsBrowserFragment
@@ -26,7 +27,6 @@ class LibraryExplorerFragment : Fragment() {
 
     companion object {
         private const val CATEGORY_FRAGMENT_TAG = "category"
-        private const val FILES_FRAGMENT_TAG = "files"
         private const val BACK_BUTTON_ANIMATION_DURATION: Long = 300
     }
 
@@ -60,27 +60,58 @@ class LibraryExplorerFragment : Fragment() {
         activity.messageExchangeHelper.sendRequest(PlaySongRequest.PATH, request)
     }
 
-    private var mBackArrow: View? = null
-    private var mBackArrowVisible: Boolean = false
+    private inner class Views(view: View) {
+        private val mBackArrow: View = view byId R.id.back_arrow
+
+        var backArrowVisible: Boolean = false
+            get
+            set(visible) {
+                if (field == visible) return
+                field = visible
+                val start = if (visible) 0f else 1f
+                val end = if (visible) 1f else 0f
+                val animator = ValueAnimator.ofFloat(start, end)
+                animator.duration = BACK_BUTTON_ANIMATION_DURATION
+                animator.addUpdateListener { animation ->
+                    val value = animation.animatedValue as Float
+                    mBackArrow.scaleX = value
+                    mBackArrow.scaleY = value
+                }
+                animator.addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationStart(animation: Animator) {
+                        if (visible) mBackArrow.visibility = View.VISIBLE
+                    }
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (!visible) mBackArrow.visibility = View.GONE
+                        animator.removeListener(this)
+                    }
+                })
+                animator.start()
+            }
+
+        init {
+            mBackArrow.setOnClickListener(View.OnClickListener {
+                val fm = childFragmentManager
+                if (fm.findFragmentByTag(CATEGORY_FRAGMENT_TAG) === null
+                        && fm.backStackEntryCount == 0) {
+                    val categoryFragment = CategorySelectionFragment()
+                    replaceFragmentImpl(categoryFragment, true, CATEGORY_FRAGMENT_TAG)
+                    backArrowVisible = false
+                    return@OnClickListener
+                }
+                if (fm.backStackEntryCount == 1) backArrowVisible = false
+                fm.popBackStackImmediate()
+            })
+        }
+    }
+
+    private var mViews: Views? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.library_explorer, container, false)
-        mBackArrow = view.findViewById(R.id.back_arrow)
-        mBackArrow!!.setOnClickListener(View.OnClickListener {
-            val fm = childFragmentManager
-            if (fm.findFragmentByTag(CATEGORY_FRAGMENT_TAG) === null
-                    && fm.backStackEntryCount == 0) {
-                val categoryFragment = CategorySelectionFragment()
-                replaceFragmentImpl(categoryFragment, true, CATEGORY_FRAGMENT_TAG)
-                changeBackArrowVisibility(false)
-                return@OnClickListener
-            }
-            if (fm.backStackEntryCount == 1) {
-                changeBackArrowVisibility(false)
-            }
-            fm.popBackStackImmediate()
-        })
+        mViews = Views(view)
         return view
     }
 
@@ -113,6 +144,11 @@ class LibraryExplorerFragment : Fragment() {
         super.onPause()
     }
 
+    override fun onDestroyView() {
+        mViews = null
+        super.onDestroyView()
+    }
+
     private fun startAlbumsBrowser(parent: Parent?, fromPlayer: Boolean) {
         val args = Bundle()
         args.putParcelable(AlbumsBrowserFragment.PARENT_KEY, parent)
@@ -130,34 +166,9 @@ class LibraryExplorerFragment : Fragment() {
         replaceFragment(fragment, fromPlayer)
     }
 
-
-    private fun changeBackArrowVisibility(visible: Boolean) {
-        if (mBackArrowVisible == visible) return
-        mBackArrowVisible = visible
-        val start = if (visible) 0f else 1f
-        val end = if (visible) 1f else 0f
-        val animator = ValueAnimator.ofFloat(start, end)
-        animator.duration = BACK_BUTTON_ANIMATION_DURATION
-        animator.addUpdateListener { animation ->
-            val value = animation.animatedValue as Float
-            mBackArrow!!.scaleX = value
-            mBackArrow!!.scaleY = value
-        }
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator) {
-                if (visible) mBackArrow!!.visibility = View.VISIBLE
-            }
-
-            override fun onAnimationEnd(animation: Animator) {
-                if (!visible) mBackArrow!!.visibility = View.GONE
-            }
-        })
-        animator.start()
-    }
-
     private fun replaceFragment(fragment: Fragment, skipBackStack: Boolean) {
         replaceFragmentImpl(fragment, skipBackStack, null)
-        changeBackArrowVisibility(true)
+        mViews?.backArrowVisible = true
     }
 
     private fun replaceFragmentImpl(fragment: Fragment, skipBackStack: Boolean, tag: String?) {
