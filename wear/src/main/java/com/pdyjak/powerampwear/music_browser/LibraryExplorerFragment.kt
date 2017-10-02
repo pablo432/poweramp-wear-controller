@@ -8,19 +8,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import com.pdyjak.powerampwear.R
 import com.pdyjak.powerampwear.common.messageExchangeHelper
 import com.pdyjak.powerampwear.common.musicLibraryNavigator
-import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
 import com.pdyjak.powerampwear.music_browser.albums.AlbumsBrowserFragment
-import com.pdyjak.powerampwear.music_browser.artists.ArtistItem
 import com.pdyjak.powerampwear.music_browser.artists.ArtistsBrowserFragment
-import com.pdyjak.powerampwear.music_browser.categories.CategoryItem
 import com.pdyjak.powerampwear.music_browser.categories.CategorySelectionFragment
-import com.pdyjak.powerampwear.music_browser.files.FileItem
 import com.pdyjak.powerampwear.music_browser.files.FilesBrowserFragment
-import com.pdyjak.powerampwear.music_browser.folders.FolderItem
 import com.pdyjak.powerampwear.music_browser.folders.FoldersBrowserFragment
 import com.pdyjak.powerampwearcommon.requests.GetAlbumsRequest
 import com.pdyjak.powerampwearcommon.requests.GetFilesRequest
@@ -28,12 +22,42 @@ import com.pdyjak.powerampwearcommon.requests.PlaySongRequest
 import com.pdyjak.powerampwearcommon.requests.RequestsPaths
 import com.pdyjak.powerampwearcommon.responses.Parent
 
-class LibraryExplorerFragment : Fragment(), MusicLibraryNavigator.Listener {
+class LibraryExplorerFragment : Fragment() {
 
     companion object {
         private const val CATEGORY_FRAGMENT_TAG = "category"
         private const val FILES_FRAGMENT_TAG = "files"
         private const val BACK_BUTTON_ANIMATION_DURATION: Long = 300
+    }
+
+    private val categorySelectedEventHandler = { args: CategorySelectedEventArgs ->
+        when (args.item.path) {
+            RequestsPaths.GET_FOLDERS -> replaceFragment(FoldersBrowserFragment(), false)
+            GetAlbumsRequest.PATH -> startAlbumsBrowser(null, false)
+            RequestsPaths.GET_ARTISTS -> replaceFragment(ArtistsBrowserFragment(), false)
+            GetFilesRequest.PATH -> startFilesBrowser(null, false, args.scrollTo)
+            "queue" -> startFilesBrowser(Parent.forQueue(), false, args.scrollTo)
+        }
+    }
+
+    private val folderSelectedEventHandler = { args: FolderSelectedEventArgs ->
+        val parent = Parent(args.item.id, Parent.Type.Folder)
+        startFilesBrowser(parent, args.fromPlayer, args.scrollTo)
+    }
+
+    private val albumSelectedEventHandler = { args: AlbumSelectedEventArgs ->
+        val parent = Parent(args.item.id, Parent.Type.Album)
+        startFilesBrowser(parent, args.fromPlayer, args.scrollTo)
+    }
+
+    private val artistSelectedEventHandler = { args: ArtistSelectedEventArgs ->
+        val parent = Parent(args.item.id, Parent.Type.Artist)
+        startAlbumsBrowser(parent, args.fromPlayer)
+    }
+
+    private val fileSelectedEventHandler = { args: FileSelectedEventArgs ->
+        val request = PlaySongRequest(args.item.trackId, args.item.contextualId, args.item.parent)
+        activity.messageExchangeHelper.sendRequest(PlaySongRequest.PATH, request)
     }
 
     private var mBackArrow: View? = null
@@ -71,38 +95,22 @@ class LibraryExplorerFragment : Fragment(), MusicLibraryNavigator.Listener {
 
     override fun onResume() {
         super.onResume()
-        activity.musicLibraryNavigator.addLibraryNavigationListener(this)
+        val navigator = activity.musicLibraryNavigator
+        navigator.onCategorySelected += categorySelectedEventHandler
+        navigator.onFolderSelected += folderSelectedEventHandler
+        navigator.onAlbumSelected += albumSelectedEventHandler
+        navigator.onArtistSelected += artistSelectedEventHandler
+        navigator.onFileSelected += fileSelectedEventHandler
     }
 
     override fun onPause() {
+        val navigator = activity.musicLibraryNavigator
+        navigator.onCategorySelected -= categorySelectedEventHandler
+        navigator.onFolderSelected -= folderSelectedEventHandler
+        navigator.onAlbumSelected -= albumSelectedEventHandler
+        navigator.onArtistSelected -= artistSelectedEventHandler
+        navigator.onFileSelected -= fileSelectedEventHandler
         super.onPause()
-        activity.musicLibraryNavigator.removeLibraryNavigationListener(this)
-    }
-
-    override fun onCategorySelected(item: CategoryItem, fromPlayer: Boolean,
-                                    scrollTo: String?) {
-        when (item.path) {
-            RequestsPaths.GET_FOLDERS -> replaceFragment(FoldersBrowserFragment(), false)
-            GetAlbumsRequest.PATH -> startAlbumsBrowser(null, false)
-            RequestsPaths.GET_ARTISTS -> replaceFragment(ArtistsBrowserFragment(), false)
-            GetFilesRequest.PATH -> startFilesBrowser(null, false, scrollTo)
-            "queue" -> startFilesBrowser(Parent.forQueue(), false, scrollTo)
-        }
-    }
-
-    override fun onFolderSelected(item: FolderItem, fromPlayer: Boolean, scrollTo: String?) {
-        val parent = Parent(item.id, Parent.Type.Folder)
-        startFilesBrowser(parent, fromPlayer, scrollTo)
-    }
-
-    override fun onAlbumSelected(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?) {
-        val parent = Parent(item.id, Parent.Type.Album)
-        startFilesBrowser(parent, fromPlayer, scrollTo)
-    }
-
-    override fun onArtistSelected(item: ArtistItem, fromPlayer: Boolean) {
-        val parent = Parent(item.id, Parent.Type.Artist)
-        startAlbumsBrowser(parent, fromPlayer)
     }
 
     private fun startAlbumsBrowser(parent: Parent?, fromPlayer: Boolean) {
@@ -113,8 +121,7 @@ class LibraryExplorerFragment : Fragment(), MusicLibraryNavigator.Listener {
         replaceFragment(fragment, fromPlayer)
     }
 
-    private fun startFilesBrowser(parent: Parent?, fromPlayer: Boolean,
-                                  scrollTo: String?) {
+    private fun startFilesBrowser(parent: Parent?, fromPlayer: Boolean, scrollTo: String?) {
         val args = Bundle()
         args.putParcelable(FilesBrowserFragment.PARENT_KEY, parent)
         args.putString(BrowserFragmentBase.SCROLL_DESTINATION_KEY, scrollTo)
@@ -123,10 +130,6 @@ class LibraryExplorerFragment : Fragment(), MusicLibraryNavigator.Listener {
         replaceFragment(fragment, fromPlayer)
     }
 
-    override fun onFileSelected(item: FileItem, fromPlayer: Boolean) {
-        val request = PlaySongRequest(item.trackId, item.contextualId, item.parent)
-        activity.messageExchangeHelper.sendRequest(PlaySongRequest.PATH, request)
-    }
 
     private fun changeBackArrowVisibility(visible: Boolean) {
         if (mBackArrowVisible == visible) return
@@ -157,8 +160,7 @@ class LibraryExplorerFragment : Fragment(), MusicLibraryNavigator.Listener {
         changeBackArrowVisibility(true)
     }
 
-    private fun replaceFragmentImpl(fragment: Fragment, skipBackStack: Boolean,
-                                    tag: String?) {
+    private fun replaceFragmentImpl(fragment: Fragment, skipBackStack: Boolean, tag: String?) {
         // https://stackoverflow.com/questions/17148285/replacing-a-fragment-with-another-fragment-of-the-same-class
         // Android is shit
         val fm = childFragmentManager

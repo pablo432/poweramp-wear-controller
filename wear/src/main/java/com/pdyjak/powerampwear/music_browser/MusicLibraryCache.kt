@@ -1,7 +1,6 @@
 package com.pdyjak.powerampwear.music_browser
 
-import com.pdyjak.powerampwear.common.Event
-import com.pdyjak.powerampwear.common.EventArgs
+import com.pdyjak.powerampwear.common.SimpleEvent
 import com.pdyjak.powerampwearcommon.responses.AlbumsResponse
 import com.pdyjak.powerampwearcommon.responses.ArtistsResponse
 import com.pdyjak.powerampwearcommon.responses.FilesListResponse
@@ -19,5 +18,5 @@ interface MusicLibraryCache {
     fun getFilesList(parent: Parent?): FilesListResponse?
     fun getAlbums(parent: Parent?): AlbumsResponse?
     val artists: ArtistsResponse?
-    val onInvalidation: Event<EventArgs>
+    val onInvalidation: SimpleEvent
 }

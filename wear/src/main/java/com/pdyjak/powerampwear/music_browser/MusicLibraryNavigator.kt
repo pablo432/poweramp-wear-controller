@@ -1,5 +1,6 @@
 package com.pdyjak.powerampwear.music_browser
 
+import com.pdyjak.powerampwear.common.Event
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
 import com.pdyjak.powerampwear.music_browser.artists.ArtistItem
 import com.pdyjak.powerampwear.music_browser.categories.CategoryItem
@@ -19,19 +20,16 @@ import com.pdyjak.powerampwear.music_browser.folders.FolderItem
  * they need to, then implementation delivers these events to all listeners.
  */
 interface MusicLibraryNavigator {
-    interface Listener {
-        fun onCategorySelected(item: CategoryItem, fromPlayer: Boolean, scrollTo: String?)
-        fun onFolderSelected(item: FolderItem, fromPlayer: Boolean, scrollTo: String?)
-        fun onAlbumSelected(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?)
-        fun onArtistSelected(item: ArtistItem, fromPlayer: Boolean)
-        fun onFileSelected(item: FileItem, fromPlayer: Boolean)
-    }
+
+    val onCategorySelected: Event<ItemSelectedEventArgs<CategoryItem>>
+    val onFolderSelected: Event<ItemSelectedEventArgs<FolderItem>>
+    val onAlbumSelected: Event<ItemSelectedEventArgs<AlbumItem>>
+    val onArtistSelected: Event<ItemSelectedEventArgs<ArtistItem>>
+    val onFileSelected: Event<ItemSelectedEventArgs<FileItem>>
 
     fun selectCategory(item: CategoryItem, fromPlayer: Boolean, scrollTo: String?)
     fun selectFolder(item: FolderItem, fromPlayer: Boolean, scrollTo: String?)
     fun selectAlbum(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?)
     fun selectFile(item: FileItem, fromPlayer: Boolean)
     fun selectArtist(item: ArtistItem, fromPlayer: Boolean)
-    fun addLibraryNavigationListener(listener: Listener)
-    fun removeLibraryNavigationListener(listener: Listener)
 }

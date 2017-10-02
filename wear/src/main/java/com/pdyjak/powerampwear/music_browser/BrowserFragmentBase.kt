@@ -13,7 +13,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.common.EventArgs
 import com.pdyjak.powerampwear.common.byId
 import com.pdyjak.powerampwear.common.musicLibraryCache
 import com.pdyjak.powerampwear.common.nullIfEmpty
@@ -32,7 +31,7 @@ abstract class BrowserFragmentBase : Fragment() {
         }
     }
 
-    private val mCacheInvalidationListener = { _: EventArgs? ->
+    private val mCacheInvalidationListener = {
         mViews?.loading = true
         fetchItems()
     }

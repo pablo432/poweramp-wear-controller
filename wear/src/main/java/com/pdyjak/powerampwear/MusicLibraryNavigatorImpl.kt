@@ -1,5 +1,11 @@
 package com.pdyjak.powerampwear
 
+import com.pdyjak.powerampwear.common.Event
+import com.pdyjak.powerampwear.music_browser.AlbumSelectedEventArgs
+import com.pdyjak.powerampwear.music_browser.ArtistSelectedEventArgs
+import com.pdyjak.powerampwear.music_browser.CategorySelectedEventArgs
+import com.pdyjak.powerampwear.music_browser.FileSelectedEventArgs
+import com.pdyjak.powerampwear.music_browser.FolderSelectedEventArgs
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
 import com.pdyjak.powerampwear.music_browser.artists.ArtistItem
@@ -7,42 +13,30 @@ import com.pdyjak.powerampwear.music_browser.categories.CategoryItem
 import com.pdyjak.powerampwear.music_browser.files.FileItem
 import com.pdyjak.powerampwear.music_browser.folders.FolderItem
 
-import java.util.HashSet
-
 class MusicLibraryNavigatorImpl : MusicLibraryNavigator {
-
-    private val mMusicBrowserListeners = HashSet<MusicLibraryNavigator.Listener>()
+    override val onCategorySelected: Event<CategorySelectedEventArgs> = Event()
+    override val onFolderSelected: Event<FolderSelectedEventArgs> = Event()
+    override val onAlbumSelected: Event<AlbumSelectedEventArgs> = Event()
+    override val onArtistSelected: Event<ArtistSelectedEventArgs> = Event()
+    override val onFileSelected: Event<FileSelectedEventArgs> = Event()
 
     override fun selectCategory(item: CategoryItem, fromPlayer: Boolean, scrollTo: String?) {
-        val copy = HashSet(mMusicBrowserListeners)
-        for (listener in copy) listener.onCategorySelected(item, fromPlayer, scrollTo)
+        onCategorySelected.notifyEventChanged(CategorySelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectFolder(item: FolderItem, fromPlayer: Boolean, scrollTo: String?) {
-        val copy = HashSet(mMusicBrowserListeners)
-        for (listener in copy) listener.onFolderSelected(item, fromPlayer, scrollTo)
+        onFolderSelected.notifyEventChanged(FolderSelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectAlbum(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?) {
-        val copy = HashSet(mMusicBrowserListeners)
-        for (listener in copy) listener.onAlbumSelected(item, fromPlayer, scrollTo)
+        onAlbumSelected.notifyEventChanged(AlbumSelectedEventArgs(item, fromPlayer, scrollTo))
     }
 
     override fun selectFile(item: FileItem, fromPlayer: Boolean) {
-        val copy = HashSet(mMusicBrowserListeners)
-        for (listener in copy) listener.onFileSelected(item, fromPlayer)
+        onFileSelected.notifyEventChanged(FileSelectedEventArgs(item, fromPlayer))
     }
 
     override fun selectArtist(item: ArtistItem, fromPlayer: Boolean) {
-        val copy = HashSet(mMusicBrowserListeners)
-        for (listener in copy) listener.onArtistSelected(item, fromPlayer)
-    }
-
-    override fun addLibraryNavigationListener(listener: MusicLibraryNavigator.Listener) {
-        mMusicBrowserListeners.add(listener)
-    }
-
-    override fun removeLibraryNavigationListener(listener: MusicLibraryNavigator.Listener) {
-        mMusicBrowserListeners.remove(listener)
+        onArtistSelected.notifyEventChanged(ArtistSelectedEventArgs(item, fromPlayer))
     }
 }

@@ -10,17 +10,14 @@ import android.support.v4.view.ViewPager
 import android.support.wearable.activity.WearableActivity
 import android.view.View
 import android.widget.ImageView
-
 import com.google.android.gms.wearable.MessageEvent
 import com.pdyjak.powerampwear.common.ambientModeStateProvider
 import com.pdyjak.powerampwear.common.app
-import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
-import com.pdyjak.powerampwear.music_browser.categories.CategoryItem
-import com.pdyjak.powerampwear.music_browser.files.FileItem
-import com.pdyjak.powerampwear.music_browser.folders.FolderItem
+import com.pdyjak.powerampwear.music_browser.Clickable
+import com.pdyjak.powerampwear.music_browser.FileSelectedEventArgs
+import com.pdyjak.powerampwear.music_browser.ItemSelectedEventArgs
 import com.pdyjak.powerampwearcommon.events.AlbumArtChangedEvent
 import com.pdyjak.powerampwearcommon.events.TrackChangedEvent
-
 import me.relex.circleindicator.CircleIndicator
 
 class MainActivity : WearableActivity(), MessageListener {
@@ -30,28 +27,12 @@ class MainActivity : WearableActivity(), MessageListener {
         const val OFFSCREEN_PAGE_LIMIT = 2
     }
 
-    private inner class MusicBrowserListener : MusicBrowserListenerAdapter() {
-        override fun onFileSelected(item: FileItem, fromPlayer: Boolean) {
-            mShouldNavigateToPlayerView = true
-        }
+    private val mFileSelectedEventHandler = { _: FileSelectedEventArgs ->
+        mShouldNavigateToPlayerView = true
+    }
 
-        override fun onFolderSelected(item: FolderItem, fromPlayer: Boolean, scrollTo: String?) {
-            goToMusicBrowserIfNeeded(fromPlayer)
-        }
-
-        override fun onAlbumSelected(item: AlbumItem, fromPlayer: Boolean, scrollTo: String?) {
-            goToMusicBrowserIfNeeded(fromPlayer)
-        }
-
-        override fun onCategorySelected(item: CategoryItem, fromPlayer: Boolean,
-                                        scrollTo: String?) {
-            goToMusicBrowserIfNeeded(fromPlayer)
-        }
-
-        private fun goToMusicBrowserIfNeeded(fromPlayer: Boolean) {
-            if (!fromPlayer) return
-            mViewPager!!.setCurrentItem(1, true)
-        }
+    private val mItemSelectedEventHandler = { args: ItemSelectedEventArgs<Clickable>? ->
+        if (args!!.fromPlayer) mViewPager!!.setCurrentItem(1, true)
     }
 
     private inner class PageChangeListener : ViewPager.OnPageChangeListener {
@@ -79,7 +60,6 @@ class MainActivity : WearableActivity(), MessageListener {
     }
 
     private val mHandler = Handler(Looper.getMainLooper())
-    private val mMusicBrowserListener = MusicBrowserListener()
 
     private var mAlbumArt: ImageView? = null
     private var mViewPager: ViewPager? = null
@@ -114,16 +94,24 @@ class MainActivity : WearableActivity(), MessageListener {
     }
 
     override fun onResume() {
+        super.onResume()
         app.onResume()
         app.messageExchangeHelper.addMessageListenerWeakly(this)
-        app.musicLibraryNavigator.addLibraryNavigationListener(mMusicBrowserListener)
-        super.onResume()
+        val navigator = app.musicLibraryNavigator
+        navigator.onFileSelected += mFileSelectedEventHandler
+        navigator.onAlbumSelected += mItemSelectedEventHandler
+        navigator.onFolderSelected += mItemSelectedEventHandler
+        navigator.onCategorySelected += mItemSelectedEventHandler
     }
 
     override fun onPause() {
         app.onPause()
         app.messageExchangeHelper.removeMessageListener(this)
-        app.musicLibraryNavigator.removeLibraryNavigationListener(mMusicBrowserListener)
+        val navigator = app.musicLibraryNavigator
+        navigator.onFileSelected -= mFileSelectedEventHandler
+        navigator.onAlbumSelected -= mItemSelectedEventHandler
+        navigator.onFolderSelected -= mItemSelectedEventHandler
+        navigator.onCategorySelected -= mItemSelectedEventHandler
         super.onPause()
     }
 
