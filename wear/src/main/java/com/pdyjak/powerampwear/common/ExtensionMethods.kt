@@ -2,6 +2,7 @@ package com.pdyjak.powerampwear.common
 
 import android.content.Context
 import android.text.TextUtils
+import android.view.View
 import com.pdyjak.powerampwear.App
 import com.pdyjak.powerampwear.MessageExchangeHelper
 import com.pdyjak.powerampwear.music_browser.MusicLibraryCache
@@ -17,3 +18,8 @@ val Context.messageExchangeHelper: MessageExchangeHelper get() = app.messageExch
 val Context.ambientModeStateProvider: AmbientModeStateProvider get() = app.ambientModeStateProvider
 
 fun String.nullIfEmpty() = if (TextUtils.isEmpty(this)) null else this
+
+@Suppress("UNCHECKED_CAST")
+infix fun <T> View.byId(viewId: Int): T {
+    return findViewById(viewId) as T
+}

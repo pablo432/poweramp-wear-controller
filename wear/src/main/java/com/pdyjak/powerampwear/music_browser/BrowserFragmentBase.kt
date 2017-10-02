@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.pdyjak.powerampwear.R
 import com.pdyjak.powerampwear.common.EventArgs
+import com.pdyjak.powerampwear.common.byId
 import com.pdyjak.powerampwear.common.musicLibraryCache
 import com.pdyjak.powerampwear.common.nullIfEmpty
 import com.pdyjak.powerampwear.common.settingsManager
@@ -27,14 +28,12 @@ abstract class BrowserFragmentBase : Fragment() {
 
     private inner class SettingsListener : SettingsManager.Listener() {
         override fun onCircularScrollingChanged() {
-            mContentView!!.isCircularScrollingGestureEnabled =
-                    activity.settingsManager.useCircularScrollingGesture()
+            mViews?.updateCircullarScrolling()
         }
     }
 
     private val mCacheInvalidationListener = { _: EventArgs? ->
-        mSpinner!!.visibility = View.VISIBLE
-        mContentView!!.visibility = View.GONE
+        mViews?.loading = true
         fetchItems()
     }
 
@@ -56,34 +55,91 @@ abstract class BrowserFragmentBase : Fragment() {
         return false
     }
 
+    private inner class Views(view: View) {
+        private val mContentView: WearableRecyclerView = view byId R.id.recycler_view
+        private val mSpinner: ProgressSpinner = view byId R.id.spinner
+        private val mSnapHelper = LinearSnapHelper()
+        private val mAdapter = BrowserRVAdapter<Clickable>(createViewHolderFactory())
+
+        var loading: Boolean = false
+            get
+            set(value) {
+                if (field == value) return
+                if (value) {
+                    mSpinner.visibility = View.VISIBLE
+                    mContentView.visibility = View.GONE
+                } else {
+                    mSpinner.visibility = View.GONE
+                    mContentView.visibility = View.VISIBLE
+                }
+            }
+
+        init {
+            mContentView.layoutManager = CurvedChildLayoutManager(activity)
+            mContentView.centerEdgeItems = true
+            mContentView.adapter = mAdapter
+            mSnapHelper.attachToRecyclerView(mContentView)
+        }
+
+        fun resume() {
+            refresh(true)
+        }
+
+        fun pause() {
+            mScrollStateHelper.save(mContentView)
+        }
+
+        fun destroy() {
+            mSnapHelper.attachToRecyclerView(null)
+            mContentView.adapter = null
+            mContentView.layoutManager = null
+        }
+
+        fun refresh(restoreScrollState: Boolean) {
+            if (tryRestoreCachedItems()) {
+                loading = false
+                if (restoreScrollState) mScrollStateHelper.restoreTo(mContentView)
+            } else {
+                loading = true
+                fetchItems()
+            }
+            if (!restoreScrollState) mContentView.scrollToPosition(0)
+        }
+
+        fun setAdapterItems(items: List<Clickable>) {
+            mAdapter.items = items
+            mSpinner.visibility = View.GONE
+            mContentView.visibility = View.VISIBLE
+            var scrollToPosition = 0
+            scrollDestination?.let {
+                scrollToPosition = items.withIndex()
+                        .find({ pair -> shouldScrollTo(pair.value, it) })?.index ?: 0
+            }
+            mContentView.post { mContentView.scrollToPosition(scrollToPosition) }
+        }
+
+        fun updateCircullarScrolling() {
+            mContentView.isCircularScrollingGestureEnabled =
+                    activity.settingsManager.useCircularScrollingGesture()
+        }
+    }
+
     private val mScrollStateHelper = ScrollStateHelper()
     private val mSettingsListener = SettingsListener()
+    private var mViews: Views? = null
 
-    private var mAdapter: BrowserRVAdapter<Clickable>? = null
-    private var mContentView: WearableRecyclerView? = null
-    private var mSnapHelper: LinearSnapHelper? = null
-    private var mSpinner: ProgressSpinner? = null
-
-    override fun onCreateView(inflater: LayoutInflater?,
+    override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.browser_view, container, false) ?: return null
-        mContentView = view.findViewById(R.id.recycler_view) as WearableRecyclerView
-        mContentView!!.layoutManager = CurvedChildLayoutManager(activity)
-        mContentView!!.centerEdgeItems = true
-        mSnapHelper = LinearSnapHelper()
-        mSnapHelper!!.attachToRecyclerView(mContentView)
-        mSpinner = view.findViewById(R.id.spinner) as ProgressSpinner
-        mAdapter = BrowserRVAdapter<Clickable>(createViewHolderFactory())
-        mContentView!!.adapter = mAdapter
+        val view = inflater.inflate(R.layout.browser_view, container, false)
+        mViews = Views(view)
         return view
     }
 
     @CallSuper
     override fun onDestroyView() {
-        mSnapHelper!!.attachToRecyclerView(null)
-        mContentView!!.adapter = null
-        mAdapter = null
+        mViews!!.destroy()
+        mViews = null
         super.onDestroyView()
     }
 
@@ -91,29 +147,14 @@ abstract class BrowserFragmentBase : Fragment() {
     override fun onResume() {
         super.onResume()
         val settingsManager = activity.settingsManager
-        mContentView!!.isCircularScrollingGestureEnabled =
-                settingsManager.useCircularScrollingGesture()
         settingsManager.addSettingsListener(mSettingsListener)
         activity.musicLibraryCache.onInvalidation += mCacheInvalidationListener
-        refresh(true)
+        mViews!!.resume()
     }
 
     fun refresh() {
         onGoingToRefresh()
-        refresh(false)
-        mContentView?.scrollToPosition(0)
-    }
-
-    private fun refresh(restoreScrollState: Boolean) {
-        if (tryRestoreCachedItems()) {
-            mSpinner!!.visibility = View.GONE
-            mContentView!!.visibility = View.VISIBLE
-            if (restoreScrollState) mScrollStateHelper.restoreTo(mContentView)
-        } else {
-            mSpinner!!.visibility = View.VISIBLE
-            mContentView!!.visibility = View.GONE
-            fetchItems()
-        }
+        mViews?.refresh(false)
     }
 
     @CallSuper
@@ -121,23 +162,11 @@ abstract class BrowserFragmentBase : Fragment() {
         super.onPause()
         activity.settingsManager.removeListener(mSettingsListener)
         activity.musicLibraryCache.onInvalidation -= mCacheInvalidationListener
-        mScrollStateHelper.save(mContentView)
+        mViews!!.pause()
     }
 
     protected fun setItems(items: List<Clickable>) {
-        mAdapter!!.items = items
-        mSpinner!!.visibility = View.GONE
-        mContentView!!.visibility = View.VISIBLE
-        var scrollToPosition = 0
-        scrollDestination?.let {
-            for (i in items.indices) {
-                if (shouldScrollTo(items[i], it)) {
-                    scrollToPosition = i
-                    break
-                }
-            }
-        }
-        mContentView!!.post { mContentView!!.scrollToPosition(scrollToPosition) }
+        mViews!!.setAdapterItems(items)
     }
 
     private val scrollDestination: String? get() = arguments?.getString(SCROLL_DESTINATION_KEY)
