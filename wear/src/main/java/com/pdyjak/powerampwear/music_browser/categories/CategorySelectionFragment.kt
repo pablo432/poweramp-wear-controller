@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.musicLibraryNavigator
+import com.pdyjak.powerampwear.common.musicLibraryNavigator
 import com.pdyjak.powerampwear.music_browser.BrowserFragmentBase
 import com.pdyjak.powerampwear.music_browser.Clickable
 import com.pdyjak.powerampwear.music_browser.ItemViewHolder

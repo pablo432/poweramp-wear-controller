@@ -9,11 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.ambientModeStateProvider
+import com.pdyjak.powerampwear.common.ambientModeStateProvider
+import com.pdyjak.powerampwear.common.messageExchangeHelper
+import com.pdyjak.powerampwear.common.musicLibraryNavigator
+import com.pdyjak.powerampwear.common.settingsManager
 import com.pdyjak.powerampwear.custom_views.SmoothScrollingLinearLayoutManager
-import com.pdyjak.powerampwear.messageExchangeHelper
-import com.pdyjak.powerampwear.musicLibraryNavigator
-import com.pdyjak.powerampwear.settingsManager
 
 class PlayerComboFragment : Fragment() {
 

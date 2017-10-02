@@ -14,9 +14,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.musicLibraryCache
+import com.pdyjak.powerampwear.common.musicLibraryCache
+import com.pdyjak.powerampwear.common.nullIfEmpty
+import com.pdyjak.powerampwear.common.settingsManager
 import com.pdyjak.powerampwear.settings.SettingsManager
-import com.pdyjak.powerampwear.settingsManager
 
 abstract class BrowserFragmentBase : Fragment() {
 
@@ -131,19 +132,17 @@ abstract class BrowserFragmentBase : Fragment() {
         mSpinner!!.visibility = View.GONE
         mContentView!!.visibility = View.VISIBLE
         var scrollToPosition = 0
-        val scrollDest = scrollDestination
-        if (scrollDest !== null && !TextUtils.isEmpty(scrollDest)) {
-            val count = items.size
-            for (i in 0..count - 1) {
-                if (shouldScrollTo(items[i], scrollDest)) {
+        scrollDestination?.let {
+            for (i in items.indices) {
+                if (shouldScrollTo(items[i], it)) {
                     scrollToPosition = i
                     break
                 }
             }
         }
-        val scrollToPosCopy = scrollToPosition
-        mContentView!!.post { mContentView!!.scrollToPosition(scrollToPosCopy) }
+        mContentView!!.post { mContentView!!.scrollToPosition(scrollToPosition) }
     }
 
     private val scrollDestination: String? get() = arguments?.getString(SCROLL_DESTINATION_KEY)
+            ?.nullIfEmpty()
 }

@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.Toast
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.musicLibraryCache
-import com.pdyjak.powerampwear.settingsManager
+import com.pdyjak.powerampwear.common.musicLibraryCache
+import com.pdyjak.powerampwear.common.settingsManager
 
 class SettingsFragment : Fragment() {
 

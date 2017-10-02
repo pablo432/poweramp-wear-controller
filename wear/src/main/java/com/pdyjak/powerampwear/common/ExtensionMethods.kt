@@ -1,7 +1,9 @@
-package com.pdyjak.powerampwear
+package com.pdyjak.powerampwear.common
 
-import android.app.Fragment
 import android.content.Context
+import android.text.TextUtils
+import com.pdyjak.powerampwear.App
+import com.pdyjak.powerampwear.MessageExchangeHelper
 import com.pdyjak.powerampwear.music_browser.MusicLibraryCache
 import com.pdyjak.powerampwear.music_browser.MusicLibraryNavigator
 import com.pdyjak.powerampwear.player.AmbientModeStateProvider
@@ -13,5 +15,5 @@ val Context.musicLibraryCache: MusicLibraryCache get() = app.cache
 val Context.musicLibraryNavigator: MusicLibraryNavigator get() = app.musicLibraryNavigator
 val Context.messageExchangeHelper: MessageExchangeHelper get() = app.messageExchangeHelper
 val Context.ambientModeStateProvider: AmbientModeStateProvider get() = app.ambientModeStateProvider
-internal val Context.ambientModeStateProviderInternal: AmbientModeStateProviderImpl
-    get() =  ambientModeStateProvider as AmbientModeStateProviderImpl
+
+fun String.nullIfEmpty() = if (TextUtils.isEmpty(this)) null else this

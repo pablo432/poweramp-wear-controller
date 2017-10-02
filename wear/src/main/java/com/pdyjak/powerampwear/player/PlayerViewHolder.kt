@@ -9,10 +9,9 @@ import android.widget.ImageView
 import android.widget.TextClock
 import android.widget.TextView
 
-import com.pdyjak.powerampwear.App
 import com.pdyjak.powerampwear.R
+import com.pdyjak.powerampwear.common.settingsManager
 import com.pdyjak.powerampwear.custom_views.CircularProgressbar
-import com.pdyjak.powerampwear.settingsManager
 
 internal class PlayerViewHolder(view: View, private val mViewModel: PlayerViewModel)
     : RecyclerView.ViewHolder(view), PlayerViewModel.CommonEventsListener,

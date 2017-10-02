@@ -10,8 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.messageExchangeHelper
-import com.pdyjak.powerampwear.musicLibraryNavigator
+import com.pdyjak.powerampwear.common.messageExchangeHelper
+import com.pdyjak.powerampwear.common.musicLibraryNavigator
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
 import com.pdyjak.powerampwear.music_browser.albums.AlbumsBrowserFragment
 import com.pdyjak.powerampwear.music_browser.artists.ArtistItem

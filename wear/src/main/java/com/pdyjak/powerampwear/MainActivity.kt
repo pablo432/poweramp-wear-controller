@@ -1,5 +1,6 @@
 package com.pdyjak.powerampwear
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -11,6 +12,8 @@ import android.view.View
 import android.widget.ImageView
 
 import com.google.android.gms.wearable.MessageEvent
+import com.pdyjak.powerampwear.common.ambientModeStateProvider
+import com.pdyjak.powerampwear.common.app
 import com.pdyjak.powerampwear.music_browser.albums.AlbumItem
 import com.pdyjak.powerampwear.music_browser.categories.CategoryItem
 import com.pdyjak.powerampwear.music_browser.files.FileItem
@@ -144,3 +147,6 @@ class MainActivity : WearableActivity(), MessageListener {
     }
 
 }
+
+internal val Context.ambientModeStateProviderInternal: AmbientModeStateProviderImpl
+    get() =  ambientModeStateProvider as AmbientModeStateProviderImpl

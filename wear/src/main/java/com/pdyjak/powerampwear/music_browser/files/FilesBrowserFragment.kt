@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import com.google.android.gms.wearable.MessageEvent
 import com.pdyjak.powerampwear.MessageListener
 import com.pdyjak.powerampwear.R
-import com.pdyjak.powerampwear.messageExchangeHelper
-import com.pdyjak.powerampwear.musicLibraryCache
-import com.pdyjak.powerampwear.musicLibraryNavigator
+import com.pdyjak.powerampwear.common.messageExchangeHelper
+import com.pdyjak.powerampwear.common.musicLibraryCache
+import com.pdyjak.powerampwear.common.musicLibraryNavigator
 import com.pdyjak.powerampwear.music_browser.BrowserFragmentBase
 import com.pdyjak.powerampwear.music_browser.Clickable
 import com.pdyjak.powerampwear.music_browser.ItemViewHolder
